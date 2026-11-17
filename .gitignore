@@ -19,3 +19,24 @@ server/friends.json
 kiem-tra-tran-*.json
 
 server/test-smtp.mjs
+
+.vite/
+node_modules/
+.vite/
+dist/
+.env
+.env.*
+!.env.example
+*.bak
+*.backup
+backup-*/
+server/users.json
+server/users.backup.json
+server/main-account.json
+server/main-auth.json
+server/friends.json
+server/leaderboard.json
+server/leaderboard.backup.json
+server/online-matches.json
+server/online-matches.backup.json
+server/test-smtp.mjs
