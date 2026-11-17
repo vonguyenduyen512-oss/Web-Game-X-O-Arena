@@ -45,14 +45,14 @@ Mở hai Terminal riêng biệt.
 **Terminal 1 – Backend**
 
 ```powershell
-cd server
+
 npm start
 ```
 
 **Terminal 2 – Frontend**
 
 ```powershell
-cd client
+
 npm run dev
 ```
 
