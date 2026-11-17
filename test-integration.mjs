@@ -15,6 +15,7 @@ fs.mkdirSync(path.join(tmp, 'server'), { recursive: true })
 fs.mkdirSync(path.join(tmp, 'client/src/lib'), { recursive: true })
 
 for (const name of [
+  'register-otp.js',
   'index.js',
   'users.json',
   'main-account.json',
