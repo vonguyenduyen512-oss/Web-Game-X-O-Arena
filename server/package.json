@@ -1,0 +1,17 @@
+{
+  "name": "xo-arena-server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "node start.js",
+    "dev": "node --watch start.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "google-auth-library": "^10.9.1",
+    "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^10.6.0",
+    "socket.io": "^4.8.1"
+  }
+}
