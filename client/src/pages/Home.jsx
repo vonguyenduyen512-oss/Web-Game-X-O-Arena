@@ -124,7 +124,7 @@ function Avatar({ avatar }) {
 
 export default function Home() {
   const nav = useNavigate()
-  const { user, logout } = useApp()
+  const { user } = useApp()
   const { players: lbPlayers } = useLeaderboard()
   const [toast, setToast] = useToast()
   const scale = useFit(1280, 720)
@@ -182,10 +182,9 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="hm-icons">
-          <button className="hm-round" onClick={() => nav('/settings')} aria-label="Cài đặt"><Ico n="gear" size={24} /></button>
-          <button className="hm-round" onClick={() => { logout(); nav('/login') }} aria-label="Đăng xuất"><Ico n="power" size={24} /></button>
-        </div>
+       <div className="hm-icons">
+  <button className="hm-round" onClick={() => nav('/settings')} aria-label="Cài đặt"><Ico n="gear" size={24} /></button>
+</div>
 
         {/* ===== menu trái ===== */}
         <nav className="hm-side">
