@@ -67,3 +67,5 @@ CaiQuenMatKhauXOArena.mjs
 node_modules/
 dist/
 *.log
+
+/backup-before-security/

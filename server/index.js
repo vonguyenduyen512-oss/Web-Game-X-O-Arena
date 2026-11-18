@@ -436,42 +436,51 @@ async function api(req, res) {
     return send(res, 200, { data: mainData[k] || null })
   }
   if (req.method === 'POST' && url === '/api/main/save') {
-    const b = await readBody(req)
     const k = mainKey(req)
-    if (!k) return send(res, 401, { error: 'Sai mật khẩu.' })
-    if (!b.user || typeof b.user !== 'object') return send(res, 400, { error: 'Thiếu dữ liệu.' })
-    if (mainData[k] && (b.user.rev || 0) < (mainData[k].user?.rev || 0)) return send(res, 200, { ok: false, stale: true })
-    if (!mainData[k] || (b.user.updatedAt || 0) >= (mainData[k].user?.updatedAt || 0)) {
-      const old = mainData[k]?.user || {}
-      const incoming = b.user
-      const nextMatches = (mainData[k]?.matches || []).slice(0, 500)
-      const matchCoins = 0
-      const matchGems = 0
-      const protectedUser = {
-        ...incoming,
-        level: old.level ?? incoming.level, exp: old.exp ?? incoming.exp, expMax: old.expMax ?? incoming.expMax,
-        rev: (old.rev || 0) + 1, updatedAt: Date.now(),
-        coins: (old.coins ?? incoming.coins) + matchCoins,
-        gems: (old.gems ?? incoming.gems) + matchGems,
-        eventClaims: old.eventClaims || [],
-        avatar: old.avatar ?? incoming.avatar,
-        frames: old.frames || [],
-        activeFrame: (old.frames || []).includes(incoming.activeFrame) ? incoming.activeFrame : 'none',
-        loginDays: old.loginDays || [],
-        id: old.id || incoming.id,
-        name: old.name || incoming.name,
-        main: old.main ?? false,
-        role: old.role,
-        isAdmin: old.isAdmin ?? false,
-        locked: old.locked ?? false,
-        wins: old.wins,
-        losses: old.losses,
-        draws: old.draws,
+    if (!k) return send(res, 401, { error: 'Chưa đăng nhập.' })
+
+    const b = await readBody(req)
+    const entry = mainData[k]
+    if (!entry?.user) {
+      return send(res, 404, { error: 'Tài khoản chưa có dữ liệu trên server.' })
+    }
+
+    const incoming = b.user
+    if (!incoming || typeof incoming !== 'object' || Array.isArray(incoming)) {
+      return send(res, 400, { error: 'Dữ liệu không hợp lệ.' })
+    }
+
+    const old = entry.user
+
+    if ((incoming.rev || 0) < (old.rev || 0)) {
+      return send(res, 200, { ok: false, stale: true, data: entry })
+    }
+
+    const changes = {}
+
+    if (typeof incoming.birthday === 'string') {
+      changes.birthday = incoming.birthday.slice(0, 20)
+    }
+
+    if (
+      typeof incoming.activeFrame === 'string' &&
+      (incoming.activeFrame === 'none' ||
+        (Array.isArray(old.frames) && old.frames.includes(incoming.activeFrame)))
+    ) {
+      changes.activeFrame = incoming.activeFrame
+    }
+
+    if (Object.keys(changes).some(field => changes[field] !== old[field])) {
+      entry.user = {
+        ...old,
+        ...changes,
+        rev: (old.rev || 0) + 1,
+        updatedAt: Date.now()
       }
-      mainData[k] = { user: protectedUser, matches: nextMatches }
       atomicSave(MAIN_FILE, mainData)
     }
-    return send(res, 200, { ok: true, data: mainData[k] })
+
+    return send(res, 200, { ok: true, data: entry })
   }
 
   if (req.method === 'POST' && url === '/api/profile/avatar') {

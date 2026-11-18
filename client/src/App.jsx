@@ -1,19 +1,46 @@
+
+import { Suspense, lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useApp } from './store.jsx'
 
-import Splash from './pages/Splash.jsx'
-import Login from './pages/Login.jsx'
-import Register from './pages/Register.jsx'
-import Home from './pages/Home.jsx'
-import ModeSelect from './pages/ModeSelect.jsx'
-import Lobby from './pages/Lobby.jsx'
-import { CreateRoom, WaitingRoom } from './pages/Rooms.jsx'
-import JoinRoom from './pages/JoinRoom.jsx'
-import Game from './pages/Game.jsx'
-import Result from './pages/Result.jsx'
-import EventHot from './pages/EventHot.jsx'
-import { Profile, History, Leaderboard } from './pages/Profile.jsx'
-import { Settings, HowToPlay } from './pages/Settings.jsx'
+const Splash = lazy(() => import('./pages/Splash.jsx'))
+const Login = lazy(() => import('./pages/Login.jsx'))
+const Register = lazy(() => import('./pages/Register.jsx'))
+const Home = lazy(() => import('./pages/Home.jsx'))
+const ModeSelect = lazy(() => import('./pages/ModeSelect.jsx'))
+const Lobby = lazy(() => import('./pages/Lobby.jsx'))
+const JoinRoom = lazy(() => import('./pages/JoinRoom.jsx'))
+const Game = lazy(() => import('./pages/Game.jsx'))
+const Result = lazy(() => import('./pages/Result.jsx'))
+const EventHot = lazy(() => import('./pages/EventHot.jsx'))
+
+const CreateRoom = lazy(() =>
+  import('./pages/Rooms.jsx').then(m => ({ default: m.CreateRoom }))
+)
+
+const WaitingRoom = lazy(() =>
+  import('./pages/Rooms.jsx').then(m => ({ default: m.WaitingRoom }))
+)
+
+const Profile = lazy(() =>
+  import('./pages/Profile.jsx').then(m => ({ default: m.Profile }))
+)
+
+const History = lazy(() =>
+  import('./pages/Profile.jsx').then(m => ({ default: m.History }))
+)
+
+const Leaderboard = lazy(() =>
+  import('./pages/Profile.jsx').then(m => ({ default: m.Leaderboard }))
+)
+
+const Settings = lazy(() =>
+  import('./pages/Settings.jsx').then(m => ({ default: m.Settings }))
+)
+
+const HowToPlay = lazy(() =>
+  import('./pages/Settings.jsx').then(m => ({ default: m.HowToPlay }))
+)
 
 function Private({ children }) {
   const { user } = useApp()
@@ -22,28 +49,31 @@ function Private({ children }) {
 
 export default function App() {
   const p = (el) => <Private>{el}</Private>
+
   return (
-    <Routes>
-      <Route path="/" element={<Splash />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+    <Suspense fallback={null}>
+      <Routes>
+        <Route path="/" element={<Splash />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-      <Route path="/home" element={p(<Home />)} />
-      <Route path="/mode" element={p(<ModeSelect />)} />
-      <Route path="/lobby" element={p(<Lobby />)} />
-      <Route path="/create-room" element={p(<CreateRoom />)} />
-      <Route path="/join-room" element={p(<JoinRoom />)} />
-      <Route path="/waiting/:code" element={p(<WaitingRoom />)} />
-      <Route path="/game/:code" element={p(<Game />)} />
-      <Route path="/result" element={p(<Result />)} />
-      <Route path="/events" element={p(<EventHot />)} />
-      <Route path="/profile" element={p(<Profile />)} />
-      <Route path="/history" element={p(<History />)} />
-      <Route path="/leaderboard" element={p(<Leaderboard />)} />
-      <Route path="/settings" element={p(<Settings />)} />
-      <Route path="/how-to-play" element={p(<HowToPlay />)} />
+        <Route path="/home" element={p(<Home />)} />
+        <Route path="/mode" element={p(<ModeSelect />)} />
+        <Route path="/lobby" element={p(<Lobby />)} />
+        <Route path="/create-room" element={p(<CreateRoom />)} />
+        <Route path="/join-room" element={p(<JoinRoom />)} />
+        <Route path="/waiting/:code" element={p(<WaitingRoom />)} />
+        <Route path="/game/:code" element={p(<Game />)} />
+        <Route path="/result" element={p(<Result />)} />
+        <Route path="/events" element={p(<EventHot />)} />
+        <Route path="/profile" element={p(<Profile />)} />
+        <Route path="/history" element={p(<History />)} />
+        <Route path="/leaderboard" element={p(<Leaderboard />)} />
+        <Route path="/settings" element={p(<Settings />)} />
+        <Route path="/how-to-play" element={p(<HowToPlay />)} />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   )
 }
