@@ -10,6 +10,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { OAuth2Client } from 'google-auth-library'
 import { requestRegistrationOtp, verifyRegistrationOtp } from './register-otp.js'
+import { requestPasswordReset, verifyPasswordReset } from './forgot-password-otp.js'
 
 const googleClientId = (process.env.GOOGLE_CLIENT_ID || '').trim()
 const googleClient = new OAuth2Client(googleClientId)
@@ -522,6 +523,66 @@ async function api(req, res) {
 
 
   // API đăng ký cũ không còn được phép tạo tài khoản trực tiếp.
+  // Quên mật khẩu cho tài khoản có Gmail trong users.json.
+  if (req.method === 'POST' && url === '/api/forgot-password/request-otp') {
+    const { email } = await readBody(req)
+    const em = String(email || '').trim().toLowerCase()
+
+    if (!/^\S+@\S+\.\S+$/.test(em))
+      return send(res, 400, { error: 'Email không hợp lệ.' })
+
+const account = users.find(
+  u => u.email === em
+)
+
+    const result = await requestPasswordReset(em, Boolean(account))
+
+    if (result.error)
+      return send(res, result.status || 400, { error: result.error })
+
+    return send(res, 200, {
+      ok: true,
+      message: 'Nếu Gmail đã đăng ký, mã OTP sẽ được gửi đến hộp thư.'
+    })
+  }
+
+  if (req.method === 'POST' && url === '/api/forgot-password/reset') {
+    const { email, otp, newPassword } = await readBody(req)
+    const em = String(email || '').trim().toLowerCase()
+
+    if (
+      typeof newPassword !== 'string' ||
+      newPassword.length < 6 ||
+      newPassword.length > 128
+    ) {
+      return send(res, 400, {
+        error: 'Mật khẩu mới phải từ 6 đến 128 ký tự.'
+      })
+    }
+
+    const account = users.find(
+     u => u.email === em
+    )
+
+    if (!account)
+      return send(res, 400, {
+        error: 'Mã OTP không hợp lệ hoặc đã hết hạn.'
+      })
+
+    const result = verifyPasswordReset(em, otp)
+
+    if (result.error)
+      return send(res, result.status || 400, { error: result.error })
+
+    account.hash = bcrypt.hashSync(newPassword, 12)
+    saveUsers()
+
+    return send(res, 200, {
+      ok: true,
+      message: 'Đổi mật khẩu thành công. Hãy đăng nhập lại.'
+    })
+  }
+
   if (req.method === 'POST' && url === '/api/register') {
     return send(res, 410, { error: 'Vui lòng xác minh Gmail bằng OTP để đăng ký.' })
   }

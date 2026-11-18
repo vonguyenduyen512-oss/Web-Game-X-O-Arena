@@ -5,12 +5,14 @@ import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import { useApp } from '../store.jsx'
 import { useToast } from '../components/Layout.jsx'
 import AuthScene, { PATH, Svg } from '../components/AuthScene.jsx'
+import ForgotPassword from './ForgotPassword.jsx'
 
 // Màn hình 02 – Đăng nhập
 export default function Login() {
   const { login, googleLogin, guestLogin } = useApp()
   const nav = useNavigate()
 
+  const [forgotOpen, setForgotOpen] = useState(false)
   const [id, setId] = useState('')
   const [pw, setPw] = useState('')
   const [show, setShow] = useState(false)
@@ -116,7 +118,7 @@ export default function Login() {
           <button
             type="button"
             className="xa-link"
-            onClick={() => setToast('Tính năng quên mật khẩu sẽ làm ở bước backend')}
+            onClick={() => setForgotOpen(true)}
           >
             Quên mật khẩu?
           </button>
@@ -173,6 +175,7 @@ export default function Login() {
         </p>
       </form>
 
+      {forgotOpen && <ForgotPassword onClose={() => setForgotOpen(false)} />}
       {toast}
     </AuthScene>
   )

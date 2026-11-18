@@ -40,3 +40,30 @@ server/leaderboard.backup.json
 server/online-matches.json
 server/online-matches.backup.json
 server/test-smtp.mjs
+
+# Cau hinh rieng
+.env
+.env.*
+!.env.example
+
+# Du lieu nguoi choi
+server/users.json
+server/main-account.json
+server/main-auth.json
+server/friends.json
+server/online-matches.json
+server/leaderboard.json
+
+# File sao luu
+*.backup*
+*.before-*
+backup-before-otp-*/
+backup-final-*/
+
+# File cai dat tam
+CaiQuenMatKhauXOArena.mjs
+
+# File build va thu vien
+node_modules/
+dist/
+*.log
