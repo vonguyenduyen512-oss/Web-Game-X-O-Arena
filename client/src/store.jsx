@@ -96,11 +96,10 @@ export function AppProvider({ children }) {
     postMain('/load', key).then((r) => done(r.data)).catch(() => done(null))
   }
   useEffect(() => { if (user?.main && sessionStorage.getItem('xo_player_token')) pullMain(user) }, []) // mở lại app khi đang đăng nhập
-  // Đẩy dữ liệu lên server mỗi khi thay đổi (sau khi đã kéo xong)
-  useEffect(() => {
-    if (user?.main && mainKeyOf(user) && pulled.current && sessionStorage.getItem('xo_player_token')) postMain('/save', mainKeyOf(user), { user, matches }).catch(() => {})
-  }, [user, matches, syncTick])
-
+// Đẩy dữ liệu lên server mỗi khi thay đổi (sau khi đã kéo xong)
+useEffect(() => {
+  if (user?.main && mainKeyOf(user) && pulled.current && sessionStorage.getItem('xo_player_token')) postMain('/save', mainKeyOf(user), { user, matches }).catch(() => {})
+}, [user, matches, syncTick])
   useEffect(() => {
     if (user && !user.main && !user.guest && user.id) {
       save('xo_account_score_' + user.id, user.score || 0)
