@@ -532,10 +532,10 @@ async function api(req, res) {
     if (name.toLocaleLowerCase('vi') === String(account.name || '').toLocaleLowerCase('vi')) return send(res, 400, { error: 'Tên mới phải khác tên hiện tại.' })
     const taken = [...Object.values(mainData).map(x => x?.user), ...users].some(u => u && u !== account && String(u.name || '').toLocaleLowerCase('vi') === name.toLocaleLowerCase('vi'))
     if (taken) return send(res, 409, { error: 'Tên này đã được sử dụng.' })
-    if ((Number(account.gems) || 0) < 200) return send(res, 409, { error: 'Cần 200 kim cương để đổi tên.' })
+    if ((Number(account.gems) || 0) < 500) return send(res, 409, { error: 'Cần 500 kim cương để đổi tên.' })
     const oldName = account.name
     account.name = name
-    account.gems = (Number(account.gems) || 0) - 200
+    account.gems = (Number(account.gems) || 0) - 500
     account.updatedAt = Date.now()
     if (key) {
       account.rev = (account.rev || 0) + 1
@@ -755,7 +755,7 @@ const account = users.find(
           level: 1,
           exp: 0,
           coins: 500,
-            gems: 500,
+            gems: 1000,
           score: 0,
           createdAt: Date.now()
         }
@@ -768,10 +768,10 @@ const account = users.find(
         return send(res, 403, { error: 'Tài khoản đã bị khóa.' })
       }
         // Thuong khoi tao Google: chi cap mot lan
-        if (!u.googleWelcome500) {
+        if (!u.googleWelcome1000) {
           u.coins = Math.max(500, Number(u.coins) || 0)
-          u.gems = Math.max(500, Number(u.gems) || 0)
-          u.googleWelcome500 = true
+          u.gems = Math.max(1000, Number(u.gems) || 0)
+          u.googleWelcome1000 = true
           saveUsers()
         }
 
