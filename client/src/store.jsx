@@ -220,7 +220,15 @@ useEffect(() => {
     }
   }
 
-  const guestLogin = () => { sessionStorage.removeItem('xo_player_token'); setUser(newUser({ name: 'Khach' + Math.floor(Math.random() * 9000 + 1000), guest: true, coins: 500, gems: 500 })); setMatches([]) }
+  const guestLogin = () => {
+  sessionStorage.removeItem('xo_player_token')
+  const guest = newUser({
+    name: 'Khach' + Math.floor(Math.random() * 9000 + 1000),
+    guest: true
+  })
+  setUser({ ...guest, coins: 500, gems: 500 })
+  setMatches([])
+}
   // Đăng xuất: dữ liệu tài khoản chính đã nằm trong xo_main nên không mất
   const logout = () => { sessionStorage.removeItem('xo_player_token'); setUser(null); setMatches([]) }
 
