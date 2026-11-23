@@ -1,5 +1,4 @@
-﻿import PasswordRequirements from '../components/PasswordRequirements.jsx'
-import { validatePassword } from '../passwordValidation.js'
+﻿import { validatePassword } from '../passwordValidation.js'
 import { useState, useEffect } from 'react'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import { Link, useNavigate } from 'react-router-dom'
@@ -207,7 +206,6 @@ export default function Register() {
           <input value={f.email} onChange={(e) => set('email')(e.target.value)} placeholder="Tên đăng nhập (Email)" aria-label="Email" autoComplete="email" />
         </label><Err k="email" />
         <Pw value={f.pw} onChange={set('pw')} placeholder="Mật khẩu" label="Mật khẩu" />
-        <PasswordRequirements password={f.pw} />
         <Err k="pw" />
         <Pw value={f.pw2} onChange={set('pw2')} placeholder="Xác nhận mật khẩu" label="Xác nhận mật khẩu" /><Err k="pw2" />
         <label className="xa-field"><Svg d={ID_CARD} />
@@ -289,5 +287,6 @@ export default function Register() {
     </AuthScene>
   )
 }
+
 
 

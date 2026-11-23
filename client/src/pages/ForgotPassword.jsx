@@ -1,5 +1,4 @@
-﻿import PasswordRequirements from '../components/PasswordRequirements.jsx'
-import { validatePassword } from '../passwordValidation.js'
+﻿import { validatePassword } from '../passwordValidation.js'
 import { useState } from 'react'
 
 export default function ForgotPassword({ onClose }) {
@@ -126,7 +125,6 @@ export default function ForgotPassword({ onClose }) {
                   onChange={e => setPassword(e.target.value)}
                   style={{ padding: 12, borderRadius: 8 }}
                 />
-                <PasswordRequirements password={password} />
 
                 <input
                   required
@@ -179,5 +177,6 @@ export default function ForgotPassword({ onClose }) {
     </div>
   )
 }
+
 
 
