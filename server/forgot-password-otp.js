@@ -48,36 +48,36 @@ export async function requestPasswordReset(email, exists) {
 
   const code = String(randomInt(0, 1000000)).padStart(6, '0')
 
-  const mailer = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 465),
-    secure: Number(process.env.SMTP_PORT || 465) === 465,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    }
-  })
-
   try {
-    await mailer.sendMail({
-      from: process.env.SMTP_USER,
-      to: email,
-      subject: 'X-O Arena - Đặt lại mật khẩu',
-      text: 'Mã đặt lại mật khẩu X-O Arena: ' + code +
-        '\nMã có hiệu lực 5 phút. Không chia sẻ mã này.'
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + process.env.RESEND_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'X-O Arena <onboarding@resend.dev>',
+        to: [email],
+        subject: 'X-O Arena - Đặt lại mật khẩu',
+        text: 'Mã đặt lại mật khẩu X-O Arena: ' + code +
+          '\nMã có hiệu lực 5 phút. Không chia sẻ mã này.'
+      })
     })
+
+    if (!response.ok) {
+      console.error('[Password reset email] Resend status=' + response.status)
+      return {
+        error: 'Không gửi được OTP. Vui lòng thử lại sau.',
+        status: 502
+      }
+    }
   } catch (error) {
-  console.error('[Password reset email] ' + JSON.stringify({
-    code: error.code || 'UNKNOWN',
-    message: error.message,
-    command: error.command || ''
-  }))
+    console.error('[Password reset email] ' + error.message)
     return {
       error: 'Không gửi được OTP. Vui lòng thử lại sau.',
       status: 502
     }
   }
-
   pending.set(email, {
     hash: digest(email, code),
     expires: Date.now() + TTL,
