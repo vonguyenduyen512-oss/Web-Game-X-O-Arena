@@ -314,9 +314,9 @@ export default function ProfileScreen() {
       {edit && (
         <Modal onClose={() => setEdit(false)}>
           <div className="panel-title">✎ Chỉnh sửa hồ sơ</div>
-          <span className="label">Tên hiển thị · Đổi tên tốn 500 kim cương</span>
+          <span className="label">Tên hiển thị · Đổi tên mất 500 kim cương</span>
           <div className="field"><input value={name} onChange={(e) => setName(e.target.value)} maxLength={20} /></div>
-          <span className="label">Ảnh đại diện</span>
+          <span className="label">Ảnh đại diện · Đổi avatar mất 500 kim cương</span>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8, maxHeight: 280, overflowY: 'auto', marginBottom: 14, padding: 2 }}>
             {[...(user.main && user.name === 'Nguyễn Duyên' ? ['👧'] : []), 'duo', ...GALLERY].map((a) => (
               <button key={a} type="button" onClick={() => setAvatar(a)} aria-label="Chọn ảnh đại diện"
