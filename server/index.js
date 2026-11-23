@@ -1,3 +1,13 @@
+﻿function validatePasswordComplexity(password, minLength = 8) {
+  if (typeof password !== 'string' || password.length < minLength || password.length > 128) {
+    return `Mật khẩu phải có từ ${minLength} đến 128 ký tự.`
+  }
+  if (!/[A-Z]/.test(password)) return 'Mật khẩu phải có ít nhất 1 chữ hoa.'
+  if (!/[a-z]/.test(password)) return 'Mật khẩu phải có ít nhất 1 chữ thường.'
+  if (!/[0-9]/.test(password)) return 'Mật khẩu phải có ít nhất 1 chữ số.'
+  if (!/[^A-Za-z0-9]/.test(password)) return 'Mật khẩu phải có ít nhất 1 ký tự đặc biệt.'
+  return null
+}
 
  // Server realtime cho X-O Arena (Socket.IO). Chạy: cd server && npm install && npm start
 // Dùng lại đúng logic bàn cờ của client (client/src/lib/game.js).
@@ -335,7 +345,7 @@ async function api(req, res) {
     if (!key) return send(res, 401, { error: 'Chưa đăng nhập.' })
     const b = await readBody(req)
     if (!bcrypt.compareSync(String(b.currentPassword || ''), mainAuth[key].hash)) return send(res, 401, { error: 'Mật khẩu hiện tại không đúng.' })
-    if (typeof b.newPassword !== 'string' || b.newPassword.length < 12 || b.newPassword.length > 128) return send(res, 400, { error: 'Mật khẩu mới phải từ 12 đến 128 ký tự.' })
+    if (validatePasswordComplexity(b.newPassword, 12)) return send(res, 400, { error: validatePasswordComplexity(b.newPassword, 12) })
     mainAuth[key].hash = bcrypt.hashSync(b.newPassword, 12)
     mainAuth[key].version = (mainAuth[key].version || 0) + 1
     saveMainAuth()
@@ -559,13 +569,9 @@ const account = users.find(
     const { email, otp, newPassword } = await readBody(req)
     const em = String(email || '').trim().toLowerCase()
 
-    if (
-      typeof newPassword !== 'string' ||
-      newPassword.length < 6 ||
-      newPassword.length > 128
-    ) {
+    if (validatePasswordComplexity(newPassword)) {
       return send(res, 400, {
-        error: 'Mật khẩu mới phải từ 6 đến 128 ký tự.'
+        error: validatePasswordComplexity(newPassword)
       })
     }
 
@@ -605,8 +611,8 @@ const account = users.find(
     if (!/^\S+@\S+\.\S+$/.test(em))
       return send(res, 400, { error: 'Email không hợp lệ.' })
 
-    if (typeof password !== 'string' || password.length < 6 || password.length > 128)
-      return send(res, 400, { error: 'Mật khẩu phải có từ 6 đến 128 ký tự.' })
+    if (validatePasswordComplexity(password))
+      return send(res, 400, { error: validatePasswordComplexity(password) })
 
     if (!requestedName)
       return send(res, 400, { error: 'Vui lòng nhập họ và tên.' })
@@ -1554,3 +1560,5 @@ io.on('connection', (sock) => {
 httpServer.listen(PORT, () => {
   console.log(`X-O Arena server chạy ở cổng ${PORT}`)
 })
+
+
