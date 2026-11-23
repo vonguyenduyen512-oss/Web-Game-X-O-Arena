@@ -67,7 +67,11 @@ export async function requestPasswordReset(email, exists) {
         '\nMã có hiệu lực 5 phút. Không chia sẻ mã này.'
     })
   } catch (error) {
-    console.error('[Password reset email]', error.message)
+  console.error('[Password reset email] ' + JSON.stringify({
+    code: error.code || 'UNKNOWN',
+    message: error.message,
+    command: error.command || ''
+  }))
     return {
       error: 'Không gửi được OTP. Vui lòng thử lại sau.',
       status: 502
