@@ -131,7 +131,7 @@ useEffect(() => {
       const data = await res.json()
       if (!res.ok) return data.error || 'Đăng nhập thất bại.'
       sessionStorage.setItem('xo_player_token', data.token)
-      setUser({ ...data.user, main: false, coins: data.user.coins ?? 500, gems: data.user.gems ?? 0, score: data.user.score || 0 })
+      setUser({ ...data.user, main: false, coins: data.user.coins ?? 500, gems: data.user.gems ?? 500, score: data.user.score || 0 })
       setMatches(data.matches || [])
       return null
     } catch { return 'Không kết nối được backend.' }
@@ -209,7 +209,7 @@ useEffect(() => {
         main: false,
         guest: false,
         coins: data.user.coins ?? 500,
-        gems: data.user.gems ?? 0,
+        gems: data.user.gems ?? 500,
         score: data.user.score ?? 0
       })
 
@@ -220,7 +220,7 @@ useEffect(() => {
     }
   }
 
-  const guestLogin = () => { sessionStorage.removeItem('xo_player_token'); setUser(newUser({ name: 'Khach' + Math.floor(Math.random() * 9000 + 1000), guest: true })); setMatches([]) }
+  const guestLogin = () => { sessionStorage.removeItem('xo_player_token'); setUser(newUser({ name: 'Khach' + Math.floor(Math.random() * 9000 + 1000), guest: true, coins: 500, gems: 500 })); setMatches([]) }
   // Đăng xuất: dữ liệu tài khoản chính đã nằm trong xo_main nên không mất
   const logout = () => { sessionStorage.removeItem('xo_player_token'); setUser(null); setMatches([]) }
 
