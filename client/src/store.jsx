@@ -302,6 +302,40 @@ const claimEventReward = async (id) => {
 const updateProfile = async (patch) => {
   if (!user) return { ok: false, error: 'Chưa đăng nhập.' }
 
+  if (patch.avatar && patch.avatar !== user.avatar) {
+    try {
+      const res = await fetch('/api/profile/avatar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + (sessionStorage.getItem('xo_player_token') || '')
+        },
+        body: JSON.stringify({ avatar: patch.avatar })
+      })
+
+      const data = await res.json()
+
+      if (!res.ok || !data.ok) {
+        return {
+          ok: false,
+          error: data.error || 'Không lưu được ảnh đại diện.'
+        }
+      }
+
+      setUser(u => u ? {
+        ...u,
+        ...data.user,
+        avatar: data.user.avatar
+      } : u)
+
+      return { ok: true }
+    } catch {
+      return { ok: false, error: 'Không kết nối được server.' }
+    }
+  }
+
+  if (!user) return { ok: false, error: 'Chưa đăng nhập.' }
+
   const key = mainKeyOf(user)
   const p = { ...patch }
   delete p.name
@@ -311,9 +345,11 @@ const updateProfile = async (patch) => {
   }
 
   if (!key) {
-    setUser(u => ({ ...u, ...p, updatedAt: Date.now() }))
-    return { ok: true }
+  return {
+    ok: false,
+    error: 'Tài khoản này chưa có chức năng lưu hồ sơ lên server.'
   }
+}
 
   try {
     const latest = await postMain('/load', key)
