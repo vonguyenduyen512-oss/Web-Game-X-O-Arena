@@ -29,4 +29,8 @@ if (process.env.NODE_ENV !== 'production') {
   }
 }
 
+const { initializeGameData } = await import('./supabase-store.js')
+
+await initializeGameData()
+
 await import('./index.js')
