@@ -673,7 +673,7 @@ const account = users.find(
       level: 1,
       exp: 0,
       coins: 500,
-      gems: 0,
+      gems: 500,
       score: 0,
       hash: data.hash,
       createdAt: Date.now()
@@ -747,7 +747,7 @@ const account = users.find(
           level: 1,
           exp: 0,
           coins: 500,
-          gems: 0,
+          gems: 500,
           score: 0,
           createdAt: Date.now()
         }
