@@ -1,16 +1,16 @@
 function validatePasswordComplexity(password, minLength = 8) {
   if (typeof password !== 'string' || password.length < minLength || password.length > 128) {
-    return `Máº­t kháº©u pháº£i cÃ³ tá»« ${minLength} Ä‘áº¿n 128 kÃ½ tá»±.`
+    return `Mật khẩu phải có từ ${minLength} đến 128 ký tự.`
   }
-  if (!/[A-Z]/.test(password)) return 'Máº­t kháº©u pháº£i cÃ³ Ã­t nháº¥t 1 chá»¯ hoa.'
-  if (!/[a-z]/.test(password)) return 'Máº­t kháº©u pháº£i cÃ³ Ã­t nháº¥t 1 chá»¯ thÆ°á»ng.'
-  if (!/[0-9]/.test(password)) return 'Máº­t kháº©u pháº£i cÃ³ Ã­t nháº¥t 1 chá»¯ sá»‘.'
-  if (!/[^A-Za-z0-9]/.test(password)) return 'Máº­t kháº©u pháº£i cÃ³ Ã­t nháº¥t 1 kÃ½ tá»± Ä‘áº·c biá»‡t.'
+  if (!/[A-Z]/.test(password)) return 'Mật khẩu phải có ít nhất 1 chữ hoa.'
+  if (!/[a-z]/.test(password)) return 'Mật khẩu phải có ít nhất 1 chữ thường.'
+  if (!/[0-9]/.test(password)) return 'Mật khẩu phải có ít nhất 1 chữ số.'
+  if (!/[^A-Za-z0-9]/.test(password)) return 'Mật khẩu phải có ít nhất 1 ký tự đặc biệt.'
   return null
 }
 
- // Server realtime cho X-O Arena (Socket.IO). Cháº¡y: cd server && npm install && npm start
-// DÃ¹ng láº¡i Ä‘Ãºng logic bÃ n cá» cá»§a client (client/src/lib/game.js).
+ // Server realtime cho X-O Arena (Socket.IO). Chạy: cd server && npm install && npm start
+// Dùng lại đúng logic bàn cờ của client (client/src/lib/game.js).
 import { createServer } from 'node:http'
 import { Server } from 'socket.io'
 import { SIZE, TURN_TIME, checkWin, createBoard } from '../client/src/lib/game.js'
@@ -25,12 +25,12 @@ import { requestPasswordReset, verifyPasswordReset } from './forgot-password-otp
 
 const googleClientId = (process.env.GOOGLE_CLIENT_ID || '').trim()
 const googleClient = new OAuth2Client(googleClientId)
-// ===== TÃ i khoáº£n (lÆ°u vÃ o server/users.json) =====
+// ===== Tài khoản (lưu vào server/users.json) =====
 const DB_FILE = new URL('./users.json', import.meta.url)
 const SECRET = process.env.JWT_SECRET || randomBytes(32).toString('hex')
-if (!process.env.JWT_SECRET) console.warn('[security] JWT_SECRET chÆ°a cáº¥u hÃ¬nh; token Ä‘Äƒng nháº­p sáº½ háº¿t hiá»‡u lá»±c khi khá»Ÿi Ä‘á»™ng láº¡i server.')
+if (!process.env.JWT_SECRET) console.warn('[security] JWT_SECRET chưa cấu hình; token đăng nhập sẽ hết hiệu lực khi khởi động lại server.')
 if (process.env.NODE_ENV === 'production' && (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32)) throw new
- Error('Production yÃªu cáº§u JWT_SECRET tá»‘i thiá»ƒu 32 kÃ½ tá»±')
+ Error('Production yêu cầu JWT_SECRET tối thiểu 32 ký tự')
 let users = []
 try { users = JSON.parse(fs.readFileSync(DB_FILE, 'utf8')) } catch {}
 const atomicSave = (file, data) => {
@@ -44,17 +44,17 @@ const saveUsers = () => atomicSave(DB_FILE, users)
 const safe = ({ hash, ...u }) => u
 const sign = (u) => jwt.sign({ id: u.id }, SECRET, { expiresIn: '30d' })
 
-// ===== TÃ i khoáº£n chÃ­nh Nguyá»…n DuyÃªn: lÆ°u dá»¯ liá»‡u lÃªn server (server/main-account.json) =====
+// ===== Tài khoản chính Nguyễn Duyên: lưu dữ liệu lên server (server/main-account.json) =====
 const MAIN_FILE = new URL('./main-account.json', import.meta.url)
 const ONLINE_FILE = new URL('./online-matches.json', import.meta.url)
 let onlineMatches = []
 try { const saved = JSON.parse(fs.readFileSync(ONLINE_FILE, 'utf8')); if (Array.isArray(saved)) onlineMatches = saved } catch {}
 const saveOnline = () => atomicSave(ONLINE_FILE, onlineMatches.slice(-5000))
-// Máº­t kháº©u tá»«ng tÃ i khoáº£n cá»‘ Ä‘á»‹nh (khÃ³a = tÃªn khÃ´ng dáº¥u, chá»¯ thÆ°á»ng). Pháº£i khá»›p MAIN_ACCOUNTS á»Ÿ client/src/store.jsx
+// Mật khẩu từng tài khoản cố định (khóa = tên không dấu, chữ thường). Phải khớp MAIN_ACCOUNTS ở client/src/store.jsx
 const LEGACY_MAIN_PASSES = JSON.parse(
   process.env.LEGACY_MAIN_PASSES_JSON || '{}'
 )
-// mainData: { [khÃ³a]: { user, matches } }. Tá»± chuyá»ƒn tá»« Ä‘á»‹nh dáº¡ng cÅ© { user, matches } (chá»‰ cÃ³ Nguyá»…n DuyÃªn)
+// mainData: { [khóa]: { user, matches } }. Tự chuyển từ định dạng cÅ© { user, matches } (chỉ có Nguyễn Duyên)
 let mainData = {}
 try {
   const raw = JSON.parse(fs.readFileSync(MAIN_FILE, 'utf8'))
@@ -88,22 +88,22 @@ const mainKey = (req) => {
 }
 
 
-// ===== Báº£ng xáº¿p háº¡ng tháº­t (server/leaderboard.json) â€” server tá»± tÃ­nh káº¿t quáº£ tá»«ng vÃ¡n =====
+// ===== Bảng xếp hạng thật (server/leaderboard.json) — server tự tính kết quả từng ván =====
 const LB_FILE = new URL('./leaderboard.json', import.meta.url)
-const SCORE = { win: 200, draw: 0, lose: -200 } // Ä‘iá»ƒm xáº¿p háº¡ng má»—i vÃ¡n (khÃ´ng xuá»‘ng dÆ°á»›i 0)
-// CÃ¡c cháº¿ Ä‘á»™ chÆ¡i: turn = sá»‘ giÃ¢y má»—i lÆ°á»£t, mult = há»‡ sá»‘ nhÃ¢n Ä‘iá»ƒm xáº¿p háº¡ng (tháº¯ng/hÃ²a/thua Ä‘á»u nhÃ¢n; hiá»‡n cáº£ hai Ä‘á»u x1)
+const SCORE = { win: 200, draw: 0, lose: -200 } // điểm xếp hạng mỗi ván (không xuống dưới 0)
+// Các chế độ chơi: turn = số giây mỗi lượt, mult = hệ số nhân điểm xếp hạng (thắng/hòa/thua đều nhân; hiện cả hai đều x1)
 const MODES = {
-  'Caro 2 ngÆ°á»i': { turn: TURN_TIME, mult: 1 },
+  'Caro 2 người': { turn: TURN_TIME, mult: 1 },
   'Caro nhanh': { turn: 10, mult: 1 },
 }
-const DEFAULT_MODE = 'Caro 2 ngÆ°á»i'
+const DEFAULT_MODE = 'Caro 2 người'
 const modeOf = (m) => (MODES[m] ? m : DEFAULT_MODE)
 let lb = {}
 try { lb = JSON.parse(fs.readFileSync(LB_FILE, 'utf8')) } catch {}
 const saveLb = () => atomicSave(LB_FILE, lb)
-const lbKey = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/Ä‘/g, 'd').replace(/Ä/g, 'D').toLowerCase().trim().replace(/\s+/g, ' ')
+const lbKey = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().trim().replace(/\s+/g, ' ')
 function recordResult(info, result, mult = 1) {
-  if (!info || info.guest || !info.verified) return // khÃ¡ch khÃ´ng lÃªn báº£ng
+  if (!info || info.guest || !info.verified) return // khách không lên bảng
   const k = lbKey(info.name)
   if (!k) return
   const e = lb[k] || (lb[k] = { name: info.name, avatar: info.avatar, level: info.level, wins: 0, draws: 0, losses: 0, score: 0 })
@@ -116,7 +116,7 @@ const topPlayers = () => Object.values(lb)
   .sort((a, b) => b.score - a.score || b.wins - a.wins || (a.updatedAt || 0) - (b.updatedAt || 0))
   .slice(0, 100)
 
-// ===== Báº¡n bÃ¨ (server/friends.json): { key: { friends: [key], incoming: [{key, name}] } } =====
+// ===== Bạn bè (server/friends.json): { key: { friends: [key], incoming: [{key, name}] } } =====
 const FR_FILE = new URL('./friends.json', import.meta.url)
 let fr = {}
 try { fr = JSON.parse(fs.readFileSync(FR_FILE, 'utf8')) } catch {}
@@ -126,19 +126,19 @@ const frOf = (k) => Object.hasOwn(fr, k) ? fr[k] : (fr[k] = { friends: [], incom
 const card = (k) => lb[k] || { name: k, avatar: 'ðŸ§‘', level: 1, wins: 0, draws: 0, losses: 0, score: 0 }
 function friendsApi(b) {
   const me = lbKey(b.me), to = lbKey(b.to)
-  if (!safeFriendKey(me) || (to && !safeFriendKey(to))) return [400, { error: 'TÃªn ngÆ°á»i chÆ¡i khÃ´ng há»£p lá»‡.' }]
+  if (!safeFriendKey(me) || (to && !safeFriendKey(to))) return [400, { error: 'Tên người chơi không hợp lệ.' }]
   const mine = frOf(me)
   if (b.action === 'add') {
-    if (!to || to === me) return [400, { error: 'TÃªn khÃ´ng há»£p lá»‡.' }]
-    if (!lb[to]) return [404, { error: 'KhÃ´ng tÃ¬m tháº¥y ngÆ°á»i chÆ¡i nÃ y (ngÆ°á»i Ä‘Ã³ pháº£i tá»«ng Ä‘áº¥u online).' }]
-    if (mine.friends.includes(to)) return [409, { error: 'Hai báº¡n Ä‘Ã£ lÃ  báº¡n bÃ¨.' }]
+    if (!to || to === me) return [400, { error: 'Tên không hợp lệ.' }]
+    if (!lb[to]) return [404, { error: 'Không tìm thấy người chơi này (người đó phải từng đấu online).' }]
+    if (mine.friends.includes(to)) return [409, { error: 'Hai bạn đã là bạn bè.' }]
     const other = frOf(to)
-    if (mine.incoming.some((x) => x.key === to)) { // há» Ä‘Ã£ má»i mÃ¬nh trÆ°á»›c -> tá»± cháº¥p nháº­n
+    if (mine.incoming.some((x) => x.key === to)) { // họ đã mời mình trước -> tự chấp nhận
       mine.incoming = mine.incoming.filter((x) => x.key !== to)
       mine.friends.push(to); other.friends.push(me)
     } else if (!other.incoming.some((x) => x.key === me)) other.incoming.push({ key: me, name: String(b.myName || b.me).slice(0, 24) })
   } else if (b.action === 'accept') {
-    if (!mine.incoming.some((x) => x.key === to)) return [404, { error: 'KhÃ´ng cÃ³ lá»i má»i nÃ y.' }]
+    if (!mine.incoming.some((x) => x.key === to)) return [404, { error: 'Không có lời mời này.' }]
     mine.incoming = mine.incoming.filter((x) => x.key !== to)
     if (!mine.friends.includes(to)) mine.friends.push(to)
     const other = frOf(to); if (!other.friends.includes(me)) other.friends.push(me)
@@ -147,14 +147,14 @@ function friendsApi(b) {
   } else if (b.action === 'remove') {
     mine.friends = mine.friends.filter((x) => x !== to)
     const other = frOf(to); other.friends = other.friends.filter((x) => x !== me)
-  } else if (b.action !== 'list') return [400, { error: 'HÃ nh Ä‘á»™ng khÃ´ng há»£p lá»‡.' }]
+  } else if (b.action !== 'list') return [400, { error: 'Hành động không hợp lệ.' }]
   saveFr()
   return [200, { friends: mine.friends.map(card), incoming: mine.incoming.map((x) => ({ ...card(x.key), key: x.key, name: lb[x.key]?.name || x.name })) }]
 }
 
 
-// ===== Dá»‹ch vá»¥ bá»• sung cho cÃ¡c mÃ n hÃ¬nh chÆ°a cÃ³ API =====
-// KhÃ´ng táº¡o dá»¯ liá»‡u máº«u, khÃ´ng thay Ä‘á»•i há»“ sÆ¡ hoáº·c sá»‘ dÆ° cá»§a ngÆ°á»i chÆ¡i.
+// ===== Dịch vụ bổ sung cho các màn hình chưa có API =====
+// Không tạo dữ liệu mẫu, không thay đổi hồ sơ hoặc số dư của người chơi.
 const FEATURES_FILE = new URL('./features.json', import.meta.url)
 let features = { messages: [], notices: {}, mailbox: {}, news: [], events: [] }
 try {
@@ -174,15 +174,15 @@ const achievementsFor = (key) => {
   const history = (mainData[key]?.matches || []).filter(m => m.onlineVerified === true)
   const wins = history.filter(m => m.result === 'win').length
   return [
-    { id: 'first-match', title: 'Tráº­n Ä‘áº§u tiÃªn', progress: Math.min(history.length, 1), target: 1, unlocked: history.length >= 1 },
-    { id: 'five-matches', title: 'ChÆ¡i 5 tráº­n', progress: Math.min(history.length, 5), target: 5, unlocked: history.length >= 5 },
-    { id: 'first-win', title: 'Chiáº¿n tháº¯ng Ä‘áº§u tiÃªn', progress: Math.min(wins, 1), target: 1, unlocked: wins >= 1 },
-    { id: 'ten-wins', title: 'Tháº¯ng 10 tráº­n', progress: Math.min(wins, 10), target: 10, unlocked: wins >= 10 },
+    { id: 'first-match', title: 'Trận đầu tiên', progress: Math.min(history.length, 1), target: 1, unlocked: history.length >= 1 },
+    { id: 'five-matches', title: 'Chơi 5 trận', progress: Math.min(history.length, 5), target: 5, unlocked: history.length >= 5 },
+    { id: 'first-win', title: 'Chiến thắng đầu tiên', progress: Math.min(wins, 1), target: 1, unlocked: wins >= 1 },
+    { id: 'ten-wins', title: 'Thắng 10 trận', progress: Math.min(wins, 10), target: 10, unlocked: wins >= 10 },
   ]
 }
 async function featureApi(req, res, url) {
   const key = mainKey(req)
-  if (!key || !playerExists(key)) return send(res, 401, { error: 'Vui lÃ²ng Ä‘Äƒng nháº­p.' })
+  if (!key || !playerExists(key)) return send(res, 401, { error: 'Vui lòng đăng nhập.' })
   const method = req.method
   if (url === '/api/achievements' && method === 'GET') return send(res, 200, { achievements: achievementsFor(key) })
   if (url === '/api/news' && method === 'GET') return send(res, 200, { news: features.news })
@@ -191,15 +191,15 @@ async function featureApi(req, res, url) {
     const today = new Date(Date.now() + 7 * 3600000).toISOString().slice(0, 10)
     const matches = (mainData[key]?.matches || []).filter(m => m.onlineVerified === true && typeof m.at === 'string' && !Number.isNaN(Date.parse(m.at)) && new Date(Date.parse(m.at) + 7 * 3600000).toISOString().slice(0, 10) === today)
     return send(res, 200, { date: today, tasks: [
-      { id: 'play-1', title: 'ChÆ¡i 1 tráº­n online', progress: Math.min(matches.length, 1), target: 1, completed: matches.length >= 1 },
-      { id: 'win-1', title: 'Tháº¯ng 1 tráº­n online', progress: Math.min(matches.filter(m => m.result === 'win').length, 1), target: 1, completed: matches.some(m => m.result === 'win') },
-    ], note: 'Tiáº¿n Ä‘á»™ chá»‰ Ä‘á»ƒ hiá»ƒn thá»‹; pháº§n thÆ°á»Ÿng pháº£i nháº­n qua API /api/main/claim.' })
+      { id: 'play-1', title: 'Chơi 1 trận online', progress: Math.min(matches.length, 1), target: 1, completed: matches.length >= 1 },
+      { id: 'win-1', title: 'Thắng 1 trận online', progress: Math.min(matches.filter(m => m.result === 'win').length, 1), target: 1, completed: matches.some(m => m.result === 'win') },
+    ], note: 'Tiến độ chỉ để hiển thị; phần thưởng phải nhận qua API /api/main/claim.' })
   }
   if (url === '/api/messages' && method === 'GET') {
     const peer = new URL(req.url, 'http://localhost').searchParams.get('with')
     if (peer) {
       const to = lbKey(peer)
-      if (!playerExists(to) || !friendsWith(key, to)) return send(res, 403, { error: 'Chá»‰ xem tin nháº¯n vá»›i báº¡n bÃ¨.' })
+      if (!playerExists(to) || !friendsWith(key, to)) return send(res, 403, { error: 'Chỉ xem tin nhắn với bạn bè.' })
       return send(res, 200, { messages: features.messages.filter(m => (m.from === key && m.to === to) || (m.from === to && m.to === key)).slice(-200) })
     }
     const peers = [...new Set(features.messages.filter(m => m.from === key || m.to === key).map(m => m.from === key ? m.to : m.from))]
@@ -208,8 +208,8 @@ async function featureApi(req, res, url) {
   if (url === '/api/messages' && method === 'POST') {
     const b = await readBody(req)
     const to = lbKey(b.to), content = limitedText(b.text, 1000)
-    if (!playerExists(to) || !friendsWith(key, to)) return send(res, 403, { error: 'Chá»‰ gá»­i tin nháº¯n cho báº¡n bÃ¨.' })
-    if (!content || typeof b.text !== 'string' || b.text.length > 1000) return send(res, 400, { error: 'Tin nháº¯n pháº£i tá»« 1 Ä‘áº¿n 1000 kÃ½ tá»±.' })
+    if (!playerExists(to) || !friendsWith(key, to)) return send(res, 403, { error: 'Chỉ gửi tin nhắn cho bạn bè.' })
+    if (!content || typeof b.text !== 'string' || b.text.length > 1000) return send(res, 400, { error: 'Tin nhắn phải từ 1 đến 1000 ký tự.' })
     const message = { id: randomUUID(), from: key, to, text: content, at: new Date().toISOString() }
     features.messages.push(message)
     if (features.messages.length > 10000) features.messages = features.messages.slice(-10000)
@@ -220,29 +220,29 @@ async function featureApi(req, res, url) {
   if (kind && method === 'GET') return send(res, 200, { items: ownArray(features[kind], key).slice(-200).reverse() })
   if (kind && method === 'POST') {
     const b = await readBody(req)
-    if (b.action !== 'read' || typeof b.id !== 'string') return send(res, 400, { error: 'YÃªu cáº§u khÃ´ng há»£p lá»‡.' })
+    if (b.action !== 'read' || typeof b.id !== 'string') return send(res, 400, { error: 'Yêu cầu không hợp lệ.' })
     const item = ownArray(features[kind], key).find(x => x.id === b.id)
-    if (!item) return send(res, 404, { error: 'KhÃ´ng tÃ¬m tháº¥y má»¥c.' })
+    if (!item) return send(res, 404, { error: 'Không tìm thấy mục.' })
     item.read = true
     saveFeatures()
     return send(res, 200, { ok: true, item })
   }
-  return send(res, 405, { error: 'PhÆ°Æ¡ng thá»©c hoáº·c Ä‘Æ°á»ng dáº«n khÃ´ng há»— trá»£.' })
+  return send(res, 405, { error: 'Phương thức hoặc đường dẫn không hỗ trợ.' })
 }
 
-// ===== VÃ¡ dá»¯ liá»‡u 1 láº§n (tá»± cháº¡y khi khá»Ÿi Ä‘á»™ng, cháº¡y láº¡i nhiá»u láº§n váº«n an toÃ n) =====
-// 1) Äá»•i tÃ i khoáº£n AC -> Ã‚n (giá»¯ nguyÃªn level, xu, lá»‹ch sá»­, báº£ng xáº¿p háº¡ng, báº¡n bÃ¨)
-// 2) Nguyá»…n DuyÃªn: Lv30, EXP 1450/3200, 70 tháº¯ng 30 thua, 1800 Ä‘iá»ƒm rank (rev 2)
+// ===== Vá dữ liệu 1 lần (tự chạy khi khởi động, chạy lại nhiều lần vẫn an toàn) =====
+// 1) Đổi tài khoản AC -> Ân (giữ nguyên level, xu, lịch sử, bảng xếp hạng, bạn bè)
+// 2) Nguyễn Duyên: Lv30, EXP 1450/3200, 70 thắng 30 thua, 1800 điểm rank (rev 2)
 function patchData() {
   let changed = false
   if (mainData['ac'] && !mainData['an']) {
     mainData['an'] = mainData['ac']; delete mainData['ac']
-    Object.assign(mainData['an'].user, { name: 'Ã‚n', id: '#62002' })
-    if (lb['ac']) { lb['an'] = { ...lb['ac'], name: 'Ã‚n' }; delete lb['ac'] }
+    Object.assign(mainData['an'].user, { name: 'Ân', id: '#62002' })
+    if (lb['ac']) { lb['an'] = { ...lb['ac'], name: 'Ân' }; delete lb['ac'] }
     if (fr['ac']) { fr['an'] = fr['ac']; delete fr['ac'] }
     for (const f of Object.values(fr)) {
       f.friends = f.friends.map((x) => (x === 'ac' ? 'an' : x))
-      f.incoming = f.incoming.map((x) => (x.key === 'ac' ? { ...x, key: 'an', name: 'Ã‚n' } : x))
+      f.incoming = f.incoming.map((x) => (x.key === 'ac' ? { ...x, key: 'an', name: 'Ân' } : x))
     }
     changed = true
   }
@@ -253,20 +253,20 @@ function patchData() {
     lb['nguyen duyen'] = { ...(lb['nguyen duyen'] || { name: d.user.name, avatar: d.user.avatar }), level: 30, wins: 70, draws: 0, losses: 30, score: 1800, updatedAt: now }
     changed = true
   }
-  // 3) Äáº·t level + Ä‘iá»ƒm xáº¿p háº¡ng cho 6 tÃ i khoáº£n cá»‘ Ä‘á»‹nh (Nguyá»…n DuyÃªn giá»¯ nguyÃªn). Cháº¡y 1 láº§n (rev 4).
-  //    Äiá»ƒm rank khá»›p cÃ´ng thá»©c: tháº¯ng +30, thua -10 (Ä‘iá»ƒm = 30*tháº¯ng - 10*thua), level cao thÃ¬ Ä‘iá»ƒm cao.
-  //    Muá»‘n Ä‘á»•i sá»‘ liá»‡u: sá»­a báº£ng SIX rá»“i tÄƒng REV lÃªn 1 (vd 5) Ä‘á»ƒ server Ã¡p láº¡i khi khá»Ÿi Ä‘á»™ng.
+  // 3) Đặt level + điểm xếp hạng cho 6 tài khoản cố định (Nguyễn Duyên giữ nguyên). Chạy 1 lần (rev 4).
+  //    Điểm rank khớp công thức: thắng +30, thua -10 (điểm = 30*thắng - 10*thua), level cao thì điểm cao.
+  //    Muốn đổi số liệu: sửa bảng SIX rồi tăng REV lên 1 (vd 5) để server áp lại khi khởi động.
   const REV = 4
   const now3 = Date.now()
   const expMaxOf = (lv) => 300 + (lv - 1) * 100
-  // [khÃ³a, tÃªn, id, avatar máº·c Ä‘á»‹nh, level, tháº¯ng, thua]
+  // [khóa, tên, id, avatar mặc định, level, thắng, thua]
   const SIX = [
-    ['quynh', 'Quá»³nh', '#62001', 'a1', 9, 12, 2], // 340
-    ['an',    'Ã‚n',    '#62002', 'a2', 8, 11, 3], // 300
+    ['quynh', 'Quỳnh', '#62001', 'a1', 9, 12, 2], // 340
+    ['an',    'Ân',    '#62002', 'a2', 8, 11, 3], // 300
     ['vy',    'Vy',    '#62003', 'a3', 7, 9, 2],  // 250
     ['huy',   'Huy',   '#62007', 'a6', 6, 8, 3],  // 210
-    ['quan',  'QuÃ¢n',  '#62004', 'a4', 5, 6, 2],  // 160
-    ['luat',  'Luáº­t',  '#62006', 'a5', 5, 6, 3],  // 150
+    ['quan',  'Quân',  '#62004', 'a4', 5, 6, 2],  // 160
+    ['luat',  'Luật',  '#62006', 'a5', 5, 6, 3],  // 150
   ]
   SIX.forEach(([k, name, id, av, level, wins, losses], i) => {
     const m = mainData[k]
@@ -274,10 +274,10 @@ function patchData() {
     if (!m) {
       const avatar = m?.user?.avatar && m.user.avatar !== 'duo' ? m.user.avatar : av
       const user = { id, name, email: '', birthday: '', guest: false, main: true, avatar, level, exp: Math.round(expMax / 2), expMax, coins: 500, gems: 0, updatedAt: now3, rev: REV }
-      mainData[k] = { user, matches: m?.matches || [] } // giá»¯ nguyÃªn lá»‹ch sá»­ tráº­n Ä‘Ã£ cÃ³
+      mainData[k] = { user, matches: m?.matches || [] } // giữ nguyên lịch sử trận đã có
       changed = true
     }
-    // Báº£ng xáº¿p háº¡ng kiá»ƒm tra riÃªng (dáº¥u rev) Ä‘á»ƒ dÃ¹ file nÃ o bá»‹ lá»‡ch cÅ©ng tá»± sá»­a Ä‘Ãºng 1 láº§n
+    // Bảng xếp hạng kiểm tra riêng (dấu rev) để dù file nào bị lệch cÅ©ng tự sửa đúng 1 lần
     if ((lb[k]?.rev || 0) < REV) {
       lb[k] = { name, avatar: mainData[k].user.avatar, level, wins, draws: 0, losses, score: Math.max(0, wins * 30 - losses * 10), updatedAt: now3 + i, rev: REV }
       changed = true
@@ -287,7 +287,7 @@ function patchData() {
     try { atomicSave(MAIN_FILE, mainData); saveLb(); saveFr() } catch {}
   }
 }
-// KhÃ´ng tá»± Ä‘á»™ng ghi Ä‘Ã¨ Ä‘iá»ƒm rank, cáº¥p Ä‘á»™ hoáº·c lá»‹ch sá»­ khi khá»Ÿi Ä‘á»™ng.
+// Không tự động ghi đè điểm rank, cấp độ hoặc lịch sử khi khởi động.
 // patchData()
 
 const send = (res, code, data) => {
@@ -319,7 +319,7 @@ async function api(req, res) {
 
   if (req.method === 'POST' && url === '/api/friends') {
     const key = mainKey(req)
-    if (!key) return send(res, 401, { error: 'Vui lÃ²ng Ä‘Äƒng nháº­p tÃ i khoáº£n chÃ­nh Ä‘á»ƒ quáº£n lÃ½ báº¡n bÃ¨.' })
+    if (!key) return send(res, 401, { error: 'Vui lòng đăng nhập tài khoản chính để quản lý bạn bè.' })
     const body = await readBody(req)
     const [code, data] = friendsApi({ ...body, me: key, myName: mainData[key]?.user?.name || key })
     return send(res, code, data)
@@ -333,20 +333,20 @@ async function api(req, res) {
   }
   if (req.method === 'GET' && url === '/api/leaderboard') return send(res, 200, { players: topPlayers() })
 
-  // Äiá»ƒm danh theo ngÃ y Viá»‡t Nam (UTC+7), chá»‰ server quyáº¿t Ä‘á»‹nh ngÃ y há»£p lá»‡.
+  // Điểm danh theo ngày Việt Nam (UTC+7), chỉ server quyết định ngày hợp lệ.
   if (req.method === 'POST' && url === '/api/main/login') {
     const b = await readBody(req)
     const key = lbKey(b.key)
     const account = mainAuth[key]
     if (!account || account.locked || !bcrypt.compareSync(String(b.password || ''), account.hash))
-      return send(res, 401, { error: 'Sai tÃ i khoáº£n, máº­t kháº©u hoáº·c tÃ i khoáº£n Ä‘Ã£ bá»‹ khÃ³a.' })
+      return send(res, 401, { error: 'Sai tài khoản, mật khẩu hoặc tài khoản đã bị khóa.' })
     return send(res, 200, { token: mainToken(key), data: mainData[key] || null })
   }
   if (req.method === 'POST' && url === '/api/main/change-password') {
     const key = mainKey(req)
-    if (!key) return send(res, 401, { error: 'ChÆ°a Ä‘Äƒng nháº­p.' })
+    if (!key) return send(res, 401, { error: 'Chưa đăng nhập.' })
     const b = await readBody(req)
-    if (!bcrypt.compareSync(String(b.currentPassword || ''), mainAuth[key].hash)) return send(res, 401, { error: 'Máº­t kháº©u hiá»‡n táº¡i khÃ´ng Ä‘Ãºng.' })
+    if (!bcrypt.compareSync(String(b.currentPassword || ''), mainAuth[key].hash)) return send(res, 401, { error: 'Mật khẩu hiện tại không đúng.' })
     if (validatePasswordComplexity(b.newPassword, 12)) return send(res, 400, { error: validatePasswordComplexity(b.newPassword, 12) })
     mainAuth[key].hash = bcrypt.hashSync(b.newPassword, 12)
     mainAuth[key].version = (mainAuth[key].version || 0) + 1
@@ -356,9 +356,9 @@ async function api(req, res) {
   if (req.method === 'POST' && url === '/api/main/checkin') {
     const b = await readBody(req)
     const k = mainKey(req)
-    if (!k) return send(res, 401, { error: 'Sai thÃ´ng tin tÃ i khoáº£n.' })
+    if (!k) return send(res, 401, { error: 'Sai thông tin tài khoản.' })
     const entry = mainData[k]
-    if (!entry?.user) return send(res, 404, { error: 'KhÃ´ng cÃ³ dá»¯ liá»‡u tÃ i khoáº£n.' })
+    if (!entry?.user) return send(res, 404, { error: 'Không có dữ liệu tài khoản.' })
     const today = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10)
     const days = [...new Set((entry.user.loginDays || []).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d) && d <= today))]
     if (days.includes(today)) return send(res, 200, { ok: true, already: true, data: entry })
@@ -368,13 +368,13 @@ async function api(req, res) {
     atomicSave(MAIN_FILE, mainData)
     return send(res, 200, { ok: true, already: false, data: entry })
   }
-  // Nháº­n thÆ°á»Ÿng trÃªn server: kiá»ƒm tra Ä‘iá»u kiá»‡n vÃ  ghi má»™t láº§n, khÃ´ng tin pháº§n thÆ°á»Ÿng client gá»­i.
+  // Nhận thưởng trên server: kiểm tra điều kiện và ghi một lần, không tin phần thưởng client gửi.
   if (req.method === 'POST' && url === '/api/main/claim') {
     const b = await readBody(req)
     const k = mainKey(req)
-    if (!k) return send(res, 401, { error: 'Sai thÃ´ng tin tÃ i khoáº£n.' })
+    if (!k) return send(res, 401, { error: 'Sai thông tin tài khoản.' })
     const entry = mainData[k]
-    if (!entry?.user) return send(res, 404, { error: 'KhÃ´ng cÃ³ dá»¯ liá»‡u tÃ i khoáº£n.' })
+    if (!entry?.user) return send(res, 404, { error: 'Không có dữ liệu tài khoản.' })
     const id = String(b.id || '')
     const rewards = {
       'nov26:m1': { kind: 'coin', n: 500 },
@@ -390,7 +390,7 @@ async function api(req, res) {
     if (weekMission || weekMile) {
       const u = entry.user
       const nowVN = new Date(Date.now() + 7*3600000).toISOString().slice(0,10)
-      if (nowVN < '2026-11-24' || nowVN > '2026-11-30') return send(res,409,{error:'Sá»± kiá»‡n tuáº§n chÆ°a diá»…n ra hoáº·c Ä‘Ã£ káº¿t thÃºc.',data:entry})
+      if (nowVN < '2026-11-24' || nowVN > '2026-11-30') return send(res,409,{error:'Sự kiện tuần chưa diễn ra hoặc đã kết thúc.',data:entry})
       const history = (entry.matches || []).filter(m => m.onlineVerified === true && typeof m.at === 'string' && !Number.isNaN(Date.parse(m.at)) && (() => { const d = new Date(Date.parse(m.at) + 7*3600000).toISOString().slice(0,10); return d >= '2026-11-24' && d <= '2026-11-30' })())
       const sorted = [...history].sort((a,b)=>Date.parse(a.at)-Date.parse(b.at))
       let streak=0,best=0
@@ -400,8 +400,8 @@ async function api(req, res) {
       const max=[30,15,5,5,3]
       const points=progress.reduce((a,n,i)=>a+Math.min(n,max[i]),0)
       const eligible=weekMission ? progress[Number(weekMission[1])] >= max[Number(weekMission[1])] : points>=Number(weekMile[1])
-      if(!eligible)return send(res,409,{error:'ChÆ°a Ä‘á»§ Ä‘iá»u kiá»‡n nháº­n thÆ°á»Ÿng.',data:entry})
-      if((u.eventClaims||[]).includes(id))return send(res,409,{error:'ÄÃ£ nháº­n pháº§n thÆ°á»Ÿng nÃ y.',data:entry})
+      if(!eligible)return send(res,409,{error:'Chưa đủ điều kiện nhận thưởng.',data:entry})
+      if((u.eventClaims||[]).includes(id))return send(res,409,{error:'Đã nhận phần thưởng này.',data:entry})
       const missionRewards=[{kind:'coin',n:1000},{kind:'gem',n:100},{kind:'coin',n:200},{kind:'coin',n:500},{kind:'gem',n:50}]
       const mileRewards={10:{kind:'coin',n:500},20:{kind:'gem',n:50},30:{kind:'coin',n:200},40:{kind:'gem',n:5000},50:{kind:'coin',n:1000}}
       const reward=weekMission?missionRewards[Number(weekMission[1])]:mileRewards[Number(weekMile[1])]
@@ -417,9 +417,9 @@ async function api(req, res) {
     const today = new Date(Date.now() + 7 * 3600000).toISOString().slice(0, 10)
     const daily = /^nov26:daily:(\d{4}-\d{2}-\d{2}):(m[12])$/.exec(id)
     const dailyReward = daily?.[2] === 'm1' ? { kind: 'coin', n: 500 } : daily?.[2] === 'm2' ? { kind: 'gem', n: 50 } : null
-    if (daily && (daily[1] !== today || !today.startsWith('2026-11-'))) return send(res, 409, { error: 'Nhiá»‡m vá»¥ nÃ y khÃ´ng thuá»™c ngÃ y hÃ´m nay.' })
+    if (daily && (daily[1] !== today || !today.startsWith('2026-11-'))) return send(res, 409, { error: 'Nhiệm vụ này không thuộc ngày hôm nay.' })
     const reward = daily ? dailyReward : rewards[id]
-    if (!reward) return send(res, 400, { error: 'Pháº§n thÆ°á»Ÿng khÃ´ng há»£p lá»‡.' })
+    if (!reward) return send(res, 400, { error: 'Phần thưởng không hợp lệ.' })
     const history = Array.isArray(entry.matches) ? entry.matches.filter(m => m.onlineVerified === true) : []
     const wins = history.filter(m => m.result === 'win').length
     const points = history.length * 10 + wins * 20
@@ -430,9 +430,9 @@ async function api(req, res) {
       : id === 'nov26:m2' ? wins >= 5
       : id === 'nov26:m3' ? days >= 7
       : points >= Number(id.split(':').at(-1))
-    if (!eligible) return send(res, 409, { error: 'ChÆ°a Ä‘áº¡t Ä‘iá»u kiá»‡n nháº­n thÆ°á»Ÿng.', data: entry })
+    if (!eligible) return send(res, 409, { error: 'Chưa đạt điều kiện nhận thưởng.', data: entry })
     const u = entry.user
-    if ((u.eventClaims || []).includes(id)) return send(res, 409, { error: 'Pháº§n thÆ°á»Ÿng Ä‘Ã£ nháº­n.', data: entry })
+    if ((u.eventClaims || []).includes(id)) return send(res, 409, { error: 'Phần thưởng đã nhận.', data: entry })
     u.eventClaims = [...(u.eventClaims || []), id]
     if (reward.kind === 'coin') u.coins = (u.coins || 0) + reward.n
     if (reward.kind === 'gem') u.gems = (u.gems || 0) + reward.n
@@ -444,22 +444,22 @@ async function api(req, res) {
   if (req.method === 'POST' && url === '/api/main/load') {
     const b = await readBody(req)
     const k = mainKey(req)
-    if (!k) return send(res, 401, { error: 'Sai máº­t kháº©u.' })
+    if (!k) return send(res, 401, { error: 'Sai mật khẩu.' })
     return send(res, 200, { data: mainData[k] || null })
   }
   if (req.method === 'POST' && url === '/api/main/save') {
     const k = mainKey(req)
-    if (!k) return send(res, 401, { error: 'ChÆ°a Ä‘Äƒng nháº­p.' })
+    if (!k) return send(res, 401, { error: 'Chưa đăng nhập.' })
 
     const b = await readBody(req)
     const entry = mainData[k]
     if (!entry?.user) {
-      return send(res, 404, { error: 'TÃ i khoáº£n chÆ°a cÃ³ dá»¯ liá»‡u trÃªn server.' })
+      return send(res, 404, { error: 'Tài khoản chưa có dữ liệu trên server.' })
     }
 
     const incoming = b.user
     if (!incoming || typeof incoming !== 'object' || Array.isArray(incoming)) {
-      return send(res, 400, { error: 'Dá»¯ liá»‡u khÃ´ng há»£p lá»‡.' })
+      return send(res, 400, { error: 'Dữ liệu không hợp lệ.' })
     }
 
     const old = entry.user
@@ -498,12 +498,12 @@ async function api(req, res) {
   if (req.method === 'POST' && url === '/api/profile/avatar') {
     const b = await readBody(req)
     const avatar = String(b.avatar || '').trim()
-    if (!avatar || avatar.length > 500_000) return send(res, 400, { error: 'áº¢nh Ä‘áº¡i diá»‡n khÃ´ng há»£p lá»‡.' })
+    if (!avatar || avatar.length > 500_000) return send(res, 400, { error: 'Ảnh đại diện không hợp lệ.' })
     const key = mainKey(req)
     const account = key ? mainData[key]?.user : authUser(req)
-    if (!account) return send(res, 401, { error: 'Vui lÃ²ng Ä‘Äƒng nháº­p láº¡i.' })
+    if (!account) return send(res, 401, { error: 'Vui lòng đăng nhập lại.' })
     if (avatar === account.avatar) return send(res, 200, { ok: true, user: key ? account : safe(account), unchanged: true })
-    if ((Number(account.gems) || 0) < 500) return send(res, 409, { error: 'Cáº§n 500 kim cÆ°Æ¡ng Ä‘á»ƒ Ä‘á»•i áº£nh Ä‘áº¡i diá»‡n.' })
+    if ((Number(account.gems) || 0) < 500) return send(res, 409, { error: 'Cần 500 kim cương để đổi ảnh đại diện.' })
     account.avatar = avatar
     account.gems = Number(account.gems) - 500
     account.updatedAt = Date.now()
@@ -517,14 +517,14 @@ async function api(req, res) {
   if (req.method === 'POST' && url === '/api/profile/rename') {
     const b = await readBody(req)
     const name = String(b.name || '').trim().replace(/\s+/g, ' ')
-    if (name.length < 2 || name.length > 20) return send(res, 400, { error: 'TÃªn pháº£i cÃ³ tá»« 2 Ä‘áº¿n 20 kÃ½ tá»±.' })
+    if (name.length < 2 || name.length > 20) return send(res, 400, { error: 'Tên phải có từ 2 đến 20 ký tự.' })
     const key = mainKey(req)
     const account = key ? mainData[key]?.user : authUser(req)
-    if (!account) return send(res, 401, { error: 'Vui lÃ²ng Ä‘Äƒng nháº­p láº¡i.' })
-    if (name.toLocaleLowerCase('vi') === String(account.name || '').toLocaleLowerCase('vi')) return send(res, 400, { error: 'TÃªn má»›i pháº£i khÃ¡c tÃªn hiá»‡n táº¡i.' })
+    if (!account) return send(res, 401, { error: 'Vui lòng đăng nhập lại.' })
+    if (name.toLocaleLowerCase('vi') === String(account.name || '').toLocaleLowerCase('vi')) return send(res, 400, { error: 'Tên mới phải khác tên hiện tại.' })
     const taken = [...Object.values(mainData).map(x => x?.user), ...users].some(u => u && u !== account && String(u.name || '').toLocaleLowerCase('vi') === name.toLocaleLowerCase('vi'))
-    if (taken) return send(res, 409, { error: 'TÃªn nÃ y Ä‘Ã£ Ä‘Æ°á»£c sá»­ dá»¥ng.' })
-    if ((Number(account.gems) || 0) < 500) return send(res, 409, { error: 'Cáº§n 500 kim cÆ°Æ¡ng Ä‘á»ƒ Ä‘á»•i tÃªn.' })
+    if (taken) return send(res, 409, { error: 'Tên này đã được sử dụng.' })
+    if ((Number(account.gems) || 0) < 500) return send(res, 409, { error: 'Cần 500 kim cương để đổi tên.' })
     const oldName = account.name
     account.name = name
     account.gems = (Number(account.gems) || 0) - 500
@@ -543,14 +543,14 @@ async function api(req, res) {
   }
 
 
-  // API Ä‘Äƒng kÃ½ cÅ© khÃ´ng cÃ²n Ä‘Æ°á»£c phÃ©p táº¡o tÃ i khoáº£n trá»±c tiáº¿p.
-  // QuÃªn máº­t kháº©u cho tÃ i khoáº£n cÃ³ Gmail trong users.json.
+  // API đăng ký cÅ© không còn được phép tạo tài khoản trực tiếp.
+  // Quên mật khẩu cho tài khoản có Gmail trong users.json.
   if (req.method === 'POST' && url === '/api/forgot-password/request-otp') {
     const { email } = await readBody(req)
     const em = String(email || '').trim().toLowerCase()
 
     if (!/^\S+@\S+\.\S+$/.test(em))
-      return send(res, 400, { error: 'Email khÃ´ng há»£p lá»‡.' })
+      return send(res, 400, { error: 'Email không hợp lệ.' })
 
 const account = users.find(
   u => u.email === em
@@ -563,7 +563,7 @@ const account = users.find(
 
     return send(res, 200, {
       ok: true,
-      message: 'Náº¿u Gmail Ä‘Ã£ Ä‘Äƒng kÃ½, mÃ£ OTP sáº½ Ä‘Æ°á»£c gá»­i Ä‘áº¿n há»™p thÆ°.'
+      message: 'Nếu Gmail đã đăng ký, mã OTP sẽ được gửi đến hộp thư.'
     })
   }
 
@@ -583,7 +583,7 @@ const account = users.find(
 
     if (!account)
       return send(res, 400, {
-        error: 'MÃ£ OTP khÃ´ng há»£p lá»‡ hoáº·c Ä‘Ã£ háº¿t háº¡n.'
+        error: 'Mã OTP không hợp lệ hoặc đã hết hạn.'
       })
 
     const result = verifyPasswordReset(em, otp)
@@ -596,35 +596,35 @@ const account = users.find(
 
     return send(res, 200, {
       ok: true,
-      message: 'Äá»•i máº­t kháº©u thÃ nh cÃ´ng. HÃ£y Ä‘Äƒng nháº­p láº¡i.'
+      message: 'Đổi mật khẩu thành công. Hãy đăng nhập lại.'
     })
   }
 
   if (req.method === 'POST' && url === '/api/register') {
-    return send(res, 410, { error: 'Vui lÃ²ng xÃ¡c minh Gmail báº±ng OTP Ä‘á»ƒ Ä‘Äƒng kÃ½.' })
+    return send(res, 410, { error: 'Vui lòng xác minh Gmail bằng OTP để đăng ký.' })
   }
 
-  // BÆ°á»›c 1: Kiá»ƒm tra thÃ´ng tin vÃ  gá»­i OTP.
+  // Bước 1: Kiểm tra thông tin và gửi OTP.
   if (req.method === 'POST' && url === '/api/register/request-otp') {
     const { email, password, name, birthday } = await readBody(req)
     const em = String(email || '').trim().toLowerCase()
     const requestedName = String(name || '').trim().slice(0, 24)
 
     if (!/^\S+@\S+\.\S+$/.test(em))
-      return send(res, 400, { error: 'Email khÃ´ng há»£p lá»‡.' })
+      return send(res, 400, { error: 'Email không hợp lệ.' })
 
     if (validatePasswordComplexity(password))
       return send(res, 400, { error: validatePasswordComplexity(password) })
 
     if (!requestedName)
-      return send(res, 400, { error: 'Vui lÃ²ng nháº­p há» vÃ  tÃªn.' })
+      return send(res, 400, { error: 'Vui lòng nhập họ và tên.' })
 
     if (users.some(u => u.email === em))
-      return send(res, 409, { error: 'Email nÃ y Ä‘Ã£ Ä‘Æ°á»£c Ä‘Äƒng kÃ½.' })
+      return send(res, 409, { error: 'Email này đã được đăng ký.' })
 
     if (users.some(u => lbKey(u.name) === lbKey(requestedName)) ||
         mainAuth[lbKey(requestedName)]) {
-      return send(res, 409, { error: 'TÃªn ngÆ°á»i chÆ¡i Ä‘Ã£ Ä‘Æ°á»£c sá»­ dá»¥ng.' })
+      return send(res, 409, { error: 'Tên người chơi đã được sử dụng.' })
     }
 
     const result = await requestRegistrationOtp(em, {
@@ -639,11 +639,11 @@ const account = users.find(
 
     return send(res, 200, {
       ok: true,
-      message: 'ÄÃ£ gá»­i mÃ£ OTP Ä‘áº¿n Gmail. MÃ£ cÃ³ hiá»‡u lá»±c trong 5 phÃºt.'
+      message: 'Đã gửi mã OTP đến Gmail. Mã có hiệu lực trong 5 phút.'
     })
   }
 
-  // BÆ°á»›c 2: XÃ¡c minh OTP rá»“i má»›i táº¡o tÃ i khoáº£n.
+  // Bước 2: Xác minh OTP rồi mới tạo tài khoản.
   if (req.method === 'POST' && url === '/api/register/verify-otp') {
     const { email, otp } = await readBody(req)
     const em = String(email || '').trim().toLowerCase()
@@ -655,13 +655,13 @@ const account = users.find(
 
     const data = result.registration
 
-    // Kiá»ƒm tra láº¡i Ä‘á»ƒ trÃ¡nh táº¡o tÃ i khoáº£n trÃ¹ng.
+    // Kiểm tra lại để tránh tạo tài khoản trùng.
     if (users.some(u => u.email === em))
-      return send(res, 409, { error: 'Email nÃ y Ä‘Ã£ Ä‘Æ°á»£c Ä‘Äƒng kÃ½.' })
+      return send(res, 409, { error: 'Email này đã được đăng ký.' })
 
     if (users.some(u => lbKey(u.name) === lbKey(data.name)) ||
         mainAuth[lbKey(data.name)]) {
-      return send(res, 409, { error: 'TÃªn ngÆ°á»i chÆ¡i Ä‘Ã£ Ä‘Æ°á»£c sá»­ dá»¥ng.' })
+      return send(res, 409, { error: 'Tên người chơi đã được sử dụng.' })
     }
 
     const u = {
@@ -689,15 +689,15 @@ const account = users.find(
     })
   }
 
-  // ÄÄƒng nháº­p báº±ng tÃ i khoáº£n Google
+  // Đăng nhập bằng tài khoản Google
   if (req.method === 'POST' && url === '/api/auth/google') {
     if (!googleClientId || googleClientId.startsWith('REPLACE_WITH_')) {
-      return send(res, 503, { error: 'Google Login chÆ°a Ä‘Æ°á»£c cáº¥u hÃ¬nh.' })
+      return send(res, 503, { error: 'Google Login chưa được cấu hình.' })
     }
 
     const { credential } = await readBody(req)
     if (typeof credential !== 'string' || !credential) {
-      return send(res, 400, { error: 'Thiáº¿u thÃ´ng tin xÃ¡c thá»±c Google.' })
+      return send(res, 400, { error: 'Thiếu thông tin xác thực Google.' })
     }
 
     try {
@@ -708,7 +708,7 @@ const account = users.find(
 
       const profile = ticket.getPayload()
       if (!profile?.sub || !profile.email_verified || !profile.email) {
-        return send(res, 401, { error: 'TÃ i khoáº£n Google khÃ´ng há»£p lá»‡.' })
+        return send(res, 401, { error: 'Tài khoản Google không hợp lệ.' })
       }
 
       let u = users.find(x => x.googleSub === profile.sub)
@@ -717,11 +717,11 @@ const account = users.find(
         const email = profile.email.toLowerCase()
         if (users.some(x => x.email === email)) {
           return send(res, 409, {
-            error: 'Email Ä‘Ã£ cÃ³ tÃ i khoáº£n. HÃ£y Ä‘Äƒng nháº­p báº±ng máº­t kháº©u trÆ°á»›c.'
+            error: 'Email đã có tài khoản. Hãy đăng nhập bằng mật khẩu trước.'
           })
         }
 
-        const baseName = String(profile.name || 'NgÆ°á»i chÆ¡i').trim().slice(0, 24)
+        const baseName = String(profile.name || 'Người chơi').trim().slice(0, 24)
         let name = baseName
         let n = 2
 
@@ -757,7 +757,7 @@ const account = users.find(
       }
 
       if (u.locked) {
-        return send(res, 403, { error: 'TÃ i khoáº£n Ä‘Ã£ bá»‹ khÃ³a.' })
+        return send(res, 403, { error: 'Tài khoản đã bị khóa.' })
       }
 
       return send(res, 200, {
@@ -767,11 +767,11 @@ const account = users.find(
       })
     } catch (err) {
       console.error('[Google Login]', err.message)
-      return send(res, 401, { error: 'XÃ¡c thá»±c Google tháº¥t báº¡i.' })
+      return send(res, 401, { error: 'Xác thực Google thất bại.' })
     }
   }
 
-  // ÄÄƒng nháº­p báº±ng email vÃ  máº­t kháº©u
+  // Đăng nhập bằng email và mật khẩu
   if (req.method === 'POST' && url === '/api/login') {
     const { id, password } = await readBody(req)
     const key = String(id || '').trim().toLowerCase()
@@ -779,7 +779,7 @@ const account = users.find(
 
     if (!u || u.locked || typeof u.hash !== 'string' ||
         !bcrypt.compareSync(String(password || ''), u.hash)) {
-      return send(res, 401, { error: 'Sai tÃªn Ä‘Äƒng nháº­p hoáº·c máº­t kháº©u.' })
+      return send(res, 401, { error: 'Sai tên đăng nhập hoặc mật khẩu.' })
     }
 
     return send(res, 200, {
@@ -791,17 +791,17 @@ const account = users.find(
 
   if (url === '/api/me') {
     const u = authUser(req)
-    if (!u) return send(res, 401, { error: 'ChÆ°a Ä‘Äƒng nháº­p.' })
+    if (!u) return send(res, 401, { error: 'Chưa đăng nhập.' })
     if (req.method === 'GET') return send(res, 200, { user: safe(u) })
     if (req.method === 'PATCH') {
       const b = await readBody(req)
-      // Äá»•i tÃªn chá»‰ thá»±c hiá»‡n qua /api/profile/rename (500 kim cÆ°Æ¡ng).
-      // Äá»•i avatar pháº£i qua /api/profile/avatar Ä‘á»ƒ trá»« 500 kim cÆ°Æ¡ng.
+      // Đổi tên chỉ thực hiện qua /api/profile/rename (500 kim cương).
+      // Đổi avatar phải qua /api/profile/avatar để trừ 500 kim cương.
       saveUsers()
       return send(res, 200, { user: safe(u) })
     }
   }
-  send(res, 404, { error: 'KhÃ´ng tÃ¬m tháº¥y' })
+  send(res, 404, { error: 'Không tìm thấy' })
 }
 
 const PORT = process.env.PORT || 3001
@@ -815,7 +815,7 @@ const io = new Server(httpServer, { cors: { origin: true } })
 /** @type {Map<string, any>} */
 const rooms = new Map()
 
-// Chá»‰ tÃ i khoáº£n cá»‘ Ä‘á»‹nh Ä‘Ã£ xÃ¡c thá»±c má»›i Ä‘Æ°á»£c ghi lá»‹ch sá»­ vÃ o tÃ i khoáº£n.
+// Chỉ tài khoản cố định đã xác thực mới được ghi lịch sử vào tài khoản.
 const verifiedKey = (u) => {
   try {
     const payload = jwt.verify(String(u?.token || ''), SECRET)
@@ -847,7 +847,7 @@ const verifiedInfo = (u) => {
 
   return {
     info: pub({
-      name: u?.name || 'KhÃ¡ch',
+      name: u?.name || 'Khách',
       level: u?.level,
       avatar: u?.avatar,
       guest: true
@@ -890,7 +890,7 @@ const saveVerifiedMatch = (r, over) => {
     const delta = result === 'win' ? 200 : result === 'lose' ? -200 : 100
     const gemDelta = result === 'win' ? 100 : result === 'lose' ? -100 : 50
     const opponent = r.players.find(q => q.id !== p.id)?.info || {
-      name: 'Äá»‘i thá»§'
+      name: 'Đối thủ'
     }
 
     if (p.accountKey) {
@@ -981,7 +981,7 @@ account.matches = [
 let quickWaiting = null
 
 const pub = (u) => ({
-  name: String(u?.name || 'NgÆ°á»i chÆ¡i').slice(0, 24),
+  name: String(u?.name || 'Người chơi').slice(0, 24),
   level: Number(u?.level) || 1,
   avatar: u?.avatar || 'ðŸ§‘',
   guest: !!u?.guest
@@ -1126,13 +1126,13 @@ io.on('connection', (sock) => {
       if (!identity.key && !identity.userId) {
         return cb?.({
           ok: false,
-          error: 'PhiÃªn Ä‘Äƒng nháº­p khÃ´ng há»£p lá»‡. Vui lÃ²ng Ä‘Äƒng nháº­p láº¡i.'
+          error: 'Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.'
         })
       }
     if (sock.data.room) {
       return cb?.({
         ok: false,
-        error: 'HÃ£y rá»i phÃ²ng hiá»‡n táº¡i trÆ°á»›c.'
+        error: 'Hãy rời phòng hiện tại trước.'
       })
     }
 
@@ -1145,14 +1145,14 @@ io.on('connection', (sock) => {
     }
 
     if (!/^[A-Z0-9]{4,8}$/.test(c)) {
-      return cb?.({ ok: false, error: 'MÃ£ phÃ²ng khÃ´ng há»£p lá»‡' })
+      return cb?.({ ok: false, error: 'Mã phòng không hợp lệ' })
     }
 
     const old = rooms.get(c)
     if (old && !old.over) {
       return cb?.({
         ok: false,
-        error: 'MÃ£ phÃ²ng Ä‘Ã£ Ä‘Æ°á»£c sá»­ dá»¥ng'
+        error: 'Mã phòng đã được sử dụng'
       })
     }
 
@@ -1163,7 +1163,7 @@ io.on('connection', (sock) => {
 
     const nr = newRoom(c, mode)
     nr.password = String(password || '').slice(0, 20)
-    nr.name = String(name || 'PhÃ²ng ' + c).trim().slice(0, 30)
+    nr.name = String(name || 'Phòng ' + c).trim().slice(0, 30)
     nr.pub = pub !== false
 
     console.log(
@@ -1184,24 +1184,24 @@ io.on('connection', (sock) => {
       if (!identity.key && !identity.userId) {
         return cb?.({
           ok: false,
-          error: 'PhiÃªn Ä‘Äƒng nháº­p khÃ´ng há»£p lá»‡. Vui lÃ²ng Ä‘Äƒng nháº­p láº¡i.'
+          error: 'Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.'
         })
       }
     if (sock.data.room) {
       return cb?.({
         ok: false,
-        error: 'HÃ£y rá»i phÃ²ng hiá»‡n táº¡i trÆ°á»›c.'
+        error: 'Hãy rời phòng hiện tại trước.'
       })
     }
 
     const r = rooms.get(String(code || '').toUpperCase())
 
     if (!r || r.over) {
-      return cb?.({ ok: false, error: 'KhÃ´ng tÃ¬m tháº¥y phÃ²ng' })
+      return cb?.({ ok: false, error: 'Không tìm thấy phòng' })
     }
 
     if (r.players.length >= 2) {
-      return cb?.({ ok: false, error: 'PhÃ²ng Ä‘Ã£ Ä‘áº§y' })
+      return cb?.({ ok: false, error: 'Phòng đã đầy' })
     }
 
     if (r.password && String(password || '') !== r.password) {
@@ -1209,15 +1209,15 @@ io.on('connection', (sock) => {
         ok: false,
         needPassword: true,
         error: password
-          ? 'Sai máº­t kháº©u phÃ²ng'
-          : 'PhÃ²ng nÃ y cÃ³ máº­t kháº©u, hÃ£y nháº­p máº­t kháº©u'
+          ? 'Sai mật khẩu phòng'
+          : 'Phòng này có mật khẩu, hãy nhập mật khẩu'
       })
     }
 
     if (!joinRoom(r, user)) {
       return cb?.({
         ok: false,
-        error: 'KhÃ´ng thá»ƒ vÃ o phÃ²ng. HÃ£y kiá»ƒm tra Ä‘Äƒng nháº­p hoáº·c tÃ i khoáº£n Ä‘Ã£ cÃ³ trong phÃ²ng.'
+        error: 'Không thể vào phòng. Hãy kiểm tra đăng nhập hoặc tài khoản đã có trong phòng.'
       })
     }
 
@@ -1229,13 +1229,13 @@ io.on('connection', (sock) => {
       if (!identity.key && !identity.userId) {
         return cb?.({
           ok: false,
-          error: 'PhiÃªn Ä‘Äƒng nháº­p khÃ´ng há»£p lá»‡. Vui lÃ²ng Ä‘Äƒng nháº­p láº¡i.'
+          error: 'Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.'
         })
       }
     if (sock.data.room) {
       return cb?.({
         ok: false,
-        error: 'Báº¡n Ä‘ang á»Ÿ trong má»™t phÃ²ng.'
+        error: 'Bạn đang ở trong một phòng.'
       })
     }
 
@@ -1252,7 +1252,7 @@ io.on('connection', (sock) => {
           (firstIdentity.userId && firstIdentity.userId === nextIdentity.userId)) {
         return cb?.({
           ok: false,
-          error: 'KhÃ´ng thá»ƒ tá»± ghÃ©p tráº­n báº±ng cÃ¹ng má»™t tÃ i khoáº£n.'
+          error: 'Không thể tự ghép trận bằng cùng một tài khoản.'
         })
       }
 
@@ -1290,7 +1290,7 @@ io.on('connection', (sock) => {
 
         return cb?.({
           ok: false,
-          error: 'KhÃ´ng thá»ƒ ghÃ©p tráº­n.'
+          error: 'Không thể ghép trận.'
         })
       }
     } else {
@@ -1461,7 +1461,7 @@ io.on('connection', (sock) => {
     }
   })
 
-  // ChÆ¡i láº¡i: cáº£ 2 ngÆ°á»i cÃ¹ng Ä‘á»“ng Ã½
+  // Chơi lại: cả 2 người cùng đồng ý
   sock.on('rematch:request', (a, b) => {
     const cb = typeof a === 'function' ? a : b
     const r = rooms.get(sock.data.room)
@@ -1473,7 +1473,7 @@ io.on('connection', (sock) => {
     if (r.players.length < 2) {
       return cb?.({
         ok: false,
-        error: 'Äá»‘i thá»§ Ä‘Ã£ rá»i phÃ²ng'
+        error: 'Đối thủ đã rời phòng'
       })
     }
 
@@ -1560,7 +1560,7 @@ io.on('connection', (sock) => {
 })
 
 httpServer.listen(PORT, () => {
-  console.log(`X-O Arena server cháº¡y á»Ÿ cá»•ng ${PORT}`)
+  console.log(`X-O Arena server chạy ở cổng ${PORT}`)
 })
 
 
