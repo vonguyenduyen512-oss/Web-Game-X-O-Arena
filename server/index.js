@@ -463,6 +463,14 @@ async function api(req, res) {
     }
 
     const old = entry.user
+      // XO_ARENA_NGUYEN_DUYEN_1000_ONCE
+      if (k === 'nguyen duyen' && !old.duyen1000Granted) {
+        old.gems = 1000
+        old.duyen1000Granted = true
+        old.updatedAt = Date.now()
+        old.rev = (old.rev || 0) + 1
+        atomicSave(MAIN_FILE, mainData)
+      }
 
     if ((incoming.rev || 0) < (old.rev || 0)) {
       return send(res, 200, { ok: false, stale: true, data: entry })
@@ -524,10 +532,10 @@ async function api(req, res) {
     if (name.toLocaleLowerCase('vi') === String(account.name || '').toLocaleLowerCase('vi')) return send(res, 400, { error: 'Tên mới phải khác tên hiện tại.' })
     const taken = [...Object.values(mainData).map(x => x?.user), ...users].some(u => u && u !== account && String(u.name || '').toLocaleLowerCase('vi') === name.toLocaleLowerCase('vi'))
     if (taken) return send(res, 409, { error: 'Tên này đã được sử dụng.' })
-    if ((Number(account.gems) || 0) < 500) return send(res, 409, { error: 'Cần 500 kim cương để đổi tên.' })
+    if ((Number(account.gems) || 0) < 200) return send(res, 409, { error: 'Cần 200 kim cương để đổi tên.' })
     const oldName = account.name
     account.name = name
-    account.gems = (Number(account.gems) || 0) - 500
+    account.gems = (Number(account.gems) || 0) - 200
     account.updatedAt = Date.now()
     if (key) {
       account.rev = (account.rev || 0) + 1
