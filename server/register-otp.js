@@ -1,5 +1,4 @@
-﻿import nodemailer from 'nodemailer'
-import { randomInt, createHash, timingSafeEqual } from 'node:crypto'
+﻿import { randomInt, createHash, timingSafeEqual } from 'node:crypto'
 
 const pending = new Map()
 const limits = new Map()
@@ -9,16 +8,6 @@ const COOLDOWN = 60 * 1000
 const MAX_ATTEMPTS = 5
 const WINDOW = 60 * 60 * 1000
 const MAX_SENDS = 5
-
-const mailer = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT || 465),
-  secure: Number(process.env.SMTP_PORT || 465) === 465,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
-})
 
 const digest = (email, otp) =>
   createHash('sha256')
@@ -59,9 +48,16 @@ export async function requestRegistrationOtp(email, registration) {
     }
   }
 
+  if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
+    console.error('[Registration OTP] Missing Brevo configuration')
+    return {
+      error: 'Hệ thống gửi email chưa được cấu hình.',
+      status: 503
+    }
+  }
+
   const otp = String(randomInt(0, 1000000)).padStart(6, '0')
 
-  // Khóa tạm trước khi gửi để tránh yêu cầu đồng thời.
   const next = limit && now < limit.windowEnd
     ? { ...limit }
     : { count: 0, windowEnd: now + WINDOW, nextSend: 0 }
@@ -71,13 +67,40 @@ export async function requestRegistrationOtp(email, registration) {
   limits.set(email, next)
 
   try {
-    await mailer.sendMail({
-      from: process.env.SMTP_USER,
-      to: email,
-      subject: 'X-O Arena - Mã xác minh đăng ký',
-      text: `Mã xác minh X-O Arena của bạn là: ${otp}\nMã có hiệu lực trong 5 phút. Không chia sẻ mã này với người khác.`
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': process.env.BREVO_API_KEY,
+        'Content-Type': 'application/json',
+        accept: 'application/json'
+      },
+      body: JSON.stringify({
+        sender: {
+          name: 'X-O Arena',
+          email: process.env.BREVO_SENDER_EMAIL
+        },
+        to: [{ email }],
+        subject: 'X-O Arena - Mã xác minh đăng ký',
+        textContent:
+          'Mã xác minh X-O Arena của bạn là: ' + otp +
+          '\nMã có hiệu lực trong 5 phút. Không chia sẻ mã này với người khác.'
+      })
     })
-  } catch {
+
+    if (!response.ok) {
+      const detail = await response.text()
+      console.error(
+        '[Registration OTP] Brevo status=' + response.status + ' ' + detail
+      )
+      return {
+        error: 'Không gửi được email xác minh. Vui lòng thử lại sau.',
+        status: 502
+      }
+    }
+
+    console.log('[Registration OTP] Brevo accepted request')
+  } catch (error) {
+    console.error('[Registration OTP] ' + error.message)
     return {
       error: 'Không gửi được email xác minh. Vui lòng thử lại sau.',
       status: 502
@@ -115,7 +138,6 @@ export function verifyRegistrationOtp(email, otp) {
     }
   }
 
-  // Mọi lần xác minh không đúng đều được tính.
   item.attempts++
 
   if (!/^\d{6}$/.test(String(otp || ''))) {
