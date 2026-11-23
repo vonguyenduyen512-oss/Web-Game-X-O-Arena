@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import { Link, useNavigate } from 'react-router-dom'
 import { useApp } from '../store.jsx'
@@ -45,6 +45,23 @@ export default function Register() {
   const [otpError, setOtpError] = useState('')
   const [otpBusy, setOtpBusy] = useState(false)
   const [otpSentAt, setOtpSentAt] = useState(0)
+  const [secondsLeft, setSecondsLeft] = useState(0)
+
+  useEffect(() => {
+    if (!otpStep || !otpSentAt) return
+
+    const updateCountdown = () => {
+      const remaining = Math.max(
+        0,
+        Math.ceil((60000 - (Date.now() - otpSentAt)) / 1000)
+      )
+      setSecondsLeft(remaining)
+    }
+
+    updateCountdown()
+    const timer = setInterval(updateCountdown, 1000)
+    return () => clearInterval(timer)
+  }, [otpStep, otpSentAt])
   const [googleBusy, setGoogleBusy] = useState(false)
   const [googleError, setGoogleError] = useState('')
 
@@ -168,9 +185,13 @@ export default function Register() {
           </button>
 
           <button className="xa-btn alt" type="button"
-            disabled={otpBusy}
+            disabled={otpBusy || secondsLeft > 0}
             onClick={resendOtp}>
-            Gửi lại mã OTP (sau 60 giây)
+            {otpBusy
+              ? 'Đang gửi mã...'
+              : secondsLeft > 0
+                ? `Gửi lại mã OTP (${secondsLeft} giây)`
+                : 'Gửi lại mã OTP'}
           </button>
 
           <button type="button" className="xa-link"
