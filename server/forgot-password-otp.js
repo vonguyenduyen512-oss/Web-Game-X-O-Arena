@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer'
+﻿import nodemailer from 'nodemailer'
 import { randomInt, createHash, timingSafeEqual } from 'node:crypto'
 
 const pending = new Map()
@@ -44,7 +44,10 @@ export async function requestPasswordReset(email, exists) {
   pending.delete(email)
 
   // Không tiết lộ email có tồn tại hay không.
-  if (!exists) return { ok: true }
+  if (!exists) {
+    console.warn('[Password reset] Không tìm thấy tài khoản trong users.json')
+    return { ok: true }
+  }
 
   const code = String(randomInt(0, 1000000)).padStart(6, '0')
 
@@ -68,6 +71,10 @@ export async function requestPasswordReset(email, exists) {
       '\nMã có hiệu lực 5 phút. Không chia sẻ mã này.'
   })
 })
+
+if (response.ok) {
+  console.log('[Password reset email] Brevo accepted request')
+}
 
 if (!response.ok) {
   const detail = await response.text()
@@ -131,3 +138,4 @@ export function verifyPasswordReset(email, code) {
   pending.delete(email)
   return { ok: true }
 }
+
