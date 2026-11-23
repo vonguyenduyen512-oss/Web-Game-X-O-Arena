@@ -747,7 +747,7 @@ const account = users.find(
           level: 1,
           exp: 0,
           coins: 500,
-          gems: 500,
+            gems: 500,
           score: 0,
           createdAt: Date.now()
         }
@@ -759,8 +759,15 @@ const account = users.find(
       if (u.locked) {
         return send(res, 403, { error: 'Tài khoản đã bị khóa.' })
       }
+        // Thuong khoi tao Google: chi cap mot lan
+        if (!u.googleWelcome500) {
+          u.coins = Math.max(500, Number(u.coins) || 0)
+          u.gems = Math.max(500, Number(u.gems) || 0)
+          u.googleWelcome500 = true
+          saveUsers()
+        }
 
-      return send(res, 200, {
+        return send(res, 200, {
         token: sign(u),
         user: safe(u),
         matches: u.matches || []
