@@ -1551,7 +1551,7 @@ io.on('connection', (sock) => {
     })
   })
 
-  const leave = () => {
+  const leave = (options = {}) => {
     if (quickWaiting?.id === sock.id) {
       quickWaiting = null
     }
@@ -1569,7 +1569,9 @@ io.on('connection', (sock) => {
     if (r.over) {
       r.players = r.players.filter(p => p.id !== sock.id)
       r.rematch?.delete(sock.id)
-      sock.to(r.code).emit('rematch:left')
+      sock.to(r.code).emit('rematch:left', {
+        declined: options?.declined === true
+      })
 
       if (!r.players.length) {
         clearTimeout(r.cleanup)
@@ -1590,6 +1592,14 @@ io.on('connection', (sock) => {
       rooms.delete(r.code)
     }
   }
+
+  sock.on('rematch:decline', () => {
+    const r = rooms.get(sock.data.room)
+
+    if (r && r.over && symOf(r, sock)) {
+      leave({ declined: true })
+    }
+  })
 
   sock.on('room:leave', leave)
   sock.on('disconnect', leave)

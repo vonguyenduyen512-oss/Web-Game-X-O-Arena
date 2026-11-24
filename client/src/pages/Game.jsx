@@ -189,6 +189,17 @@ export default function Game() {
   const [draft, setDraft] = useState('')
   const saved = useRef(false)
   const chatEnd = useRef(null)
+  // XO_DRAW_DIALOG_2026
+  const drawDialog = useRef(null)
+
+  const closeDrawDialog = () => {
+    drawDialog.current?.remove()
+    drawDialog.current = null
+  }
+
+  useEffect(() => {
+    return () => closeDrawDialog()
+  }, [code])
   const previousMoves = useRef(0)
   const [musicOn, setMusicOn] = useState(isMusicEnabled)
 
@@ -227,15 +238,81 @@ export default function Game() {
     if (local) return undefined
     connect()
     const onMoved = ({ x, y, s: sym }) => dispatch({ type: 'move', x, y, s: sym })
-    const onOver = (over) => dispatch({ type: 'over', over })
+    const onOver = (over) => {
+      closeDrawDialog()
+      dispatch({ type: 'over', over })
+    }
     const onBalance = (balance) => applyMatchBalance(balance)
     const onRoomUpdated = ({ players }) => {
       if (players?.length === 2) setOpp(players.find(p => p.sym !== mySym) || { name: 'Đối thủ', avatar: '🧑' })
     }
     const onChat = (m) => setMsgs((l) => [...l, m])
-    const onOffer = () => socket.emit('draw:answer', { accept: window.confirm('Đối thủ đề nghị hòa trận. Bạn đồng ý?') })
+    const onOffer = () => {
+      closeDrawDialog()
+
+      const overlay = document.createElement('div')
+      overlay.style.cssText = [
+        'position:fixed',
+        'inset:0',
+        'z-index:2147483647',
+        'background:rgba(12,0,35,.72)',
+        'display:flex',
+        'align-items:center',
+        'justify-content:center',
+        'padding:20px'
+      ].join(';')
+
+      const panel = document.createElement('div')
+      panel.style.cssText = [
+        'width:360px',
+        'max-width:100%',
+        'padding:26px',
+        'border:1px solid #b6a1ff',
+        'border-radius:20px',
+        'background:linear-gradient(145deg,#361477,#21064e)',
+        'color:white',
+        'text-align:center',
+        'box-shadow:0 0 30px #713cff',
+        'font-family:Arial,sans-serif'
+      ].join(';')
+
+      const title = document.createElement('h2')
+      title.textContent = 'DRAW REQUEST'
+      title.style.cssText = 'margin:0 0 15px;font-size:22px'
+      title.textContent = '\u0110\u1EC1 ngh\u1ECB h\u00F2a tr\u1EADn'
+
+      const message = document.createElement('p')
+      message.textContent = '\u0110\u1ED1i th\u1EE7 mu\u1ED1n h\u00F2a tr\u1EADn. B\u1EA1n c\u00F3 \u0111\u1ED3ng \u00FD kh\u00F4ng?'
+
+      const actions = document.createElement('div')
+      actions.style.cssText = 'display:flex;gap:12px;margin-top:22px'
+
+      const answer = accept => {
+        closeDrawDialog()
+        socket.emit('draw:answer', { accept })
+      }
+
+      const yes = document.createElement('button')
+      yes.textContent = '\u0110\u1ED3ng \u00FD'
+      yes.style.cssText = 'flex:1;padding:12px;border:0;border-radius:10px;background:#6454ef;color:white;font-weight:bold;cursor:pointer'
+      yes.onclick = () => answer(true)
+
+      const no = document.createElement('button')
+      no.textContent = 'T\u1EEB ch\u1ED1i'
+      no.style.cssText = 'flex:1;padding:12px;border:1px solid #b6a1ff;border-radius:10px;background:#34136b;color:white;font-weight:bold;cursor:pointer'
+      no.onclick = () => answer(false)
+
+      actions.append(yes, no)
+      panel.append(title, message, actions)
+      overlay.append(panel)
+      document.body.append(overlay)
+      drawDialog.current = overlay
+    }
     const onDeclined = () => setToast('Đối thủ từ chối hòa')
-    const onDisc = () => setToast('Mất kết nối server')
+    const onDisc = () => {
+      closeDrawDialog()
+      setToast('Mat ket noi server')
+    }
     socket.on('game:moved', onMoved); socket.on('game:over', onOver); socket.on('game:balance', onBalance); socket.on('room:updated', onRoomUpdated); socket.on('chat:message', onChat)
     socket.on('draw:offered', onOffer); socket.on('draw:declined', onDeclined); socket.on('disconnect', onDisc)
     call('game:sync', { code }).then((r) => {

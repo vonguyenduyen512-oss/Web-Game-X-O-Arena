@@ -274,7 +274,12 @@ export default function Result() {
     const code = state.match.room
     const onStart = () => nav('/game/' + code, { replace: true })
     const onAsked = () => setToast('Đối thủ muốn chơi lại - bấm "Chơi lại" để đồng ý')
-    const onLeft = () => { setWaiting(false); setToast('Đối thủ đã rời phòng') }
+    const onLeft = ({ declined = false } = {}) => {
+      setWaiting(false)
+      setToast(declined
+        ? '\u0110\u1ED1i th\u1EE7 t\u1EEB ch\u1ED1i ch\u01A1i l\u1EA1i'
+        : '\u0110\u1ED1i th\u1EE7 \u0111\u00E3 r\u1EDDi ph\u00F2ng')
+    }
     socket.on('game:start', onStart); socket.on('rematch:asked', onAsked); socket.on('rematch:left', onLeft)
     return () => { socket.off('game:start', onStart); socket.off('rematch:asked', onAsked); socket.off('rematch:left', onLeft) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -294,7 +299,10 @@ export default function Result() {
   const oppKind = r === 'win' ? 'lose' : r === 'lose' ? 'win' : 'draw'
   const opp = match.opponent || { name: 'Đối thủ', level: 12 }
 
-  const go = (path) => { if (online) socket.emit('room:leave'); nav(path) }
+  const go = (path) => {
+    if (online) socket.emit('rematch:decline')
+    nav(path)
+  }
   const replay = async () => {
     if (!online) return nav('/game/' + match.room, { replace: true })
     if (waiting) return undefined
