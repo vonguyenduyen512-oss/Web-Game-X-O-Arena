@@ -42,3 +42,16 @@
 @media(max-width:900px){.xa-art{opacity:.25}.xa-tag{display:none}.xa-brand small{display:none}.xa-tools .lang{display:none}}
 @media(max-width:520px){.xa-panel{padding:34px 18px 16px}.xa-logo{height:22vh}.xa-back{left:12px;bottom:12px}}
 @media(prefers-reduced-motion:reduce){.xa *{animation:none!important;transition:none!important}}
+
+/* FIX_PASSWORD_EYE_2026 */
+/* Chi giu nut hien/an mat khau do game thiet ke */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none !important;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button {
+    visibility: hidden !important;
+    display: none !important;
+    pointer-events: none !important;
+}
