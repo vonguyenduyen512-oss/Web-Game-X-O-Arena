@@ -1,6 +1,17 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 
 // Store tạm bằng localStorage. Khi có backend: thay login/register/addMatch bằng gọi API.
+
+// XO_PERSIST_LOGIN_2026
+// Chuyen token cu tu sessionStorage sang localStorage.
+try {
+  const previousToken = sessionStorage.getItem('xo_player_token')
+  if (previousToken) {
+    localStorage.setItem('xo_player_token', previousToken)
+    sessionStorage.removeItem('xo_player_token')
+  }
+} catch {}
+
 const Ctx = createContext(null)
 export const useApp = () => useContext(Ctx)
 
@@ -46,7 +57,7 @@ const fixExp = (u) => {
 const postMain = (path, key, body = {}) =>
   fetch('/api/main' + path, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (sessionStorage.getItem('xo_player_token') || '') },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('xo_player_token') || '') },
     body: JSON.stringify(body),
   }).then((r) => r.json())
 // Mỗi tài khoản cố định lưu riêng 1 ô localStorage (Nguyễn Duyên giữ ô cũ 'xo_main' để không mất dữ liệu)
@@ -91,7 +102,7 @@ export function AppProvider({ children }) {
   // Kéo dữ liệu tài khoản chính từ server; chỉ dùng nếu mới hơn bản đang có
   const pullMain = (localUser) => {
     const key = mainKeyOf(localUser)
-    if (!key || !sessionStorage.getItem('xo_player_token')) return
+    if (!key || !localStorage.getItem('xo_player_token')) return
     pulled.current = false
     const done = (data) => {
       if (data?.user && ((data.user.rev || 0) > (localUser?.rev || 0) || ((data.user.rev || 0) === (localUser?.rev || 0) && (data.user.updatedAt || 0) > (localUser?.updatedAt || 0)))) {
@@ -103,10 +114,10 @@ export function AppProvider({ children }) {
     }
     postMain('/load', key).then((r) => done(r.data)).catch(() => done(null))
   }
-  useEffect(() => { if (user?.main && sessionStorage.getItem('xo_player_token')) pullMain(user) }, []) // mở lại app khi đang đăng nhập
+  useEffect(() => { if (user?.main && localStorage.getItem('xo_player_token')) pullMain(user) }, []) // mở lại app khi đang đăng nhập
 // Đẩy dữ liệu lên server mỗi khi thay đổi (sau khi đã kéo xong)
 useEffect(() => {
-  if (user?.main && mainKeyOf(user) && pulled.current && sessionStorage.getItem('xo_player_token')) postMain('/save', mainKeyOf(user), { user, matches }).catch(() => {})
+  if (user?.main && mainKeyOf(user) && pulled.current && localStorage.getItem('xo_player_token')) postMain('/save', mainKeyOf(user), { user, matches }).catch(() => {})
 }, [user, matches, syncTick])
   useEffect(() => {
     if (user && !user.main && !user.guest && user.id) {
@@ -127,7 +138,7 @@ useEffect(() => {
         const res = await fetch('/api/main/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: mk, password: pw }) })
         const data = await res.json()
         if (!res.ok) return data.error || 'Đăng nhập thất bại.'
-        sessionStorage.setItem('xo_player_token', data.token)
+        localStorage.setItem('xo_player_token', data.token)
         const saved = data.data || load(mainStoreKey(mk), null)
         const u = fixExp({ ...(saved?.user || newUser({ name: MAIN_ACCOUNTS[mk].name, main: true })), main: true })
         setUser(u); setMatches(saved?.matches || []); pulled.current = true
@@ -138,7 +149,7 @@ useEffect(() => {
       const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: identity, password: pw }) })
       const data = await res.json()
       if (!res.ok) return data.error || 'Đăng nhập thất bại.'
-      sessionStorage.setItem('xo_player_token', data.token)
+      localStorage.setItem('xo_player_token', data.token)
       setUser({ ...data.user, main: false, coins: data.user.coins ?? 500, gems: data.user.gems ?? 500, score: data.user.score || 0 })
       setMatches(data.matches || [])
       return null
@@ -149,7 +160,7 @@ useEffect(() => {
       const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: data.name, email: data.email, birthday: data.birthday, password: data.password }) })
       const result = await res.json()
       if (!res.ok) return result.error || 'Đăng ký thất bại.'
-      sessionStorage.setItem('xo_player_token', result.token)
+      localStorage.setItem('xo_player_token', result.token)
       setUser({ ...result.user, main: false, coins: result.user.coins ?? 500, gems: result.user.gems ?? 0, score: result.user.score || 0 }); setMatches(result.matches || [])
       return null
     } catch { return 'Không kết nối được backend.' }
@@ -181,7 +192,7 @@ useEffect(() => {
 
       if (!res.ok) return result.error || 'OTP không hợp lệ.'
 
-      sessionStorage.setItem('xo_player_token', result.token)
+      localStorage.setItem('xo_player_token', result.token)
       setUser({
         ...result.user,
         main: false,
@@ -210,7 +221,7 @@ useEffect(() => {
         return data.error || 'Đăng nhập Google thất bại.'
       }
 
-      sessionStorage.setItem('xo_player_token', data.token)
+      localStorage.setItem('xo_player_token', data.token)
 
       setUser({
         ...data.user,
@@ -229,7 +240,7 @@ useEffect(() => {
   }
 
   const guestLogin = () => {
-  sessionStorage.removeItem('xo_player_token')
+  localStorage.removeItem('xo_player_token')
   const guest = newUser({
     name: 'Khach' + Math.floor(Math.random() * 9000 + 1000),
     guest: true
@@ -238,7 +249,7 @@ useEffect(() => {
   setMatches([])
 }
   // Đăng xuất: dữ liệu tài khoản chính đã nằm trong xo_main nên không mất
-  const logout = () => { sessionStorage.removeItem('xo_player_token'); setUser(null); setMatches([]) }
+  const logout = () => { localStorage.removeItem('xo_player_token'); setUser(null); setMatches([]) }
 
   const applyMatchBalance = (balance) => {
     if (!balance || !Number.isFinite(balance.coins)) return
@@ -312,7 +323,7 @@ const claimEventReward = async (id) => {
     try {
       const res = await fetch('/api/profile/rename', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (sessionStorage.getItem('xo_player_token') || '') },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (localStorage.getItem('xo_player_token') || '') },
         body: JSON.stringify({ name })
       })
       const data = await res.json()
@@ -331,7 +342,7 @@ const updateProfile = async (patch) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + (sessionStorage.getItem('xo_player_token') || '')
+          Authorization: 'Bearer ' + (localStorage.getItem('xo_player_token') || '')
         },
         body: JSON.stringify({ avatar: patch.avatar })
       })

@@ -148,7 +148,7 @@ export default function CreateRoom() {
   const create = async () => {
     if (!name.trim()) return setToast('Vui lòng nhập tên phòng')
     if (pw && pw.length < 4) return setToast('Mật khẩu phòng tối thiểu 4 ký tự')
-    const res = await call('room:create', { name: name.trim(), pub, mode, password: pw, user: { name: user.name, level: user.level, avatar: user.avatar, token: sessionStorage.getItem('xo_player_token') } })
+    const res = await call('room:create', { name: name.trim(), pub, mode, password: pw, user: { name: user.name, level: user.level, avatar: user.avatar, token: localStorage.getItem('xo_player_token') } })
     if (!res.ok) return setToast(res.error)
     nav(`/waiting/${res.code}`, { state: { name: name.trim(), mode, players, pub, hasPw: !!pw } })
   }

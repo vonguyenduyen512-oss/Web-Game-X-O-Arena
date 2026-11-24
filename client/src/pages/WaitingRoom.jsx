@@ -387,7 +387,7 @@ export default function WaitingRoom() {
   // Realtime: chờ server báo có đối thủ ('room:updated') rồi vào ván ('game:start')
   const [oppInfo, setOppInfo] = useState(null)
   useEffect(() => {
-    const me = { name: user?.name, level: user?.level, avatar: user?.avatar, token: sessionStorage.getItem('xo_player_token') }
+    const me = { name: user?.name, level: user?.level, avatar: user?.avatar, token: localStorage.getItem('xo_player_token') }
     const onUpdated = ({ code: c, players }) => {
       setJoined(players.length === 2)
       if (players.length === 2) call('game:sync', { code: c }).then((r) => { if (r.ok) setOppInfo(r.state.players.find((p) => p.sym !== r.state.you) || null) })

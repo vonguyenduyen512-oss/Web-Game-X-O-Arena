@@ -232,7 +232,7 @@ export default function LeaderboardScreen() {
   const [fOpen, setFOpen] = useState(false)
   const [fName, setFName] = useState('')
   const fcall = useCallback((action, to) => fetch('/api/friends', {
-    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('xo_player_token') || ''}` },
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('xo_player_token') || ''}` },
     body: JSON.stringify({ me: user?.name, myName: user?.name, action, to }),
   }).then(async (r) => ({ ok: r.ok, ...(await r.json()) })).then((d) => {
     if (d.ok) { setFriends(d.friends || []); setIncoming(d.incoming || []) }

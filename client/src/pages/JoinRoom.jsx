@@ -128,7 +128,7 @@ export default function JoinRoom() {
   const join = async () => {
     const c = code.trim().toUpperCase()
     if (c.length < 4) return setToast('Mã phòng không hợp lệ')
-    const res = await call('room:join', { code: c, password: pw, user: { name: user.name, level: user.level, avatar: user.avatar, token: sessionStorage.getItem('xo_player_token') } })
+    const res = await call('room:join', { code: c, password: pw, user: { name: user.name, level: user.level, avatar: user.avatar, token: localStorage.getItem('xo_player_token') } })
     if (!res.ok) return setToast(res.error)
     nav(`/game/${res.code}`)
   }
