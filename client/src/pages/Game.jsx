@@ -387,7 +387,7 @@ export default function Game() {
       <div className="xo-mobile-room">
         <button type="button" className="xo-mobile-music"
           onClick={changeMusic} aria-pressed={musicOn}>
-          {musicOn ? '?? Nh?c: B?t' : '?? Nh?c: T?t'}
+          <span aria-hidden="true">{musicOn ? "\uD83D\uDD0A" : "\uD83D\uDD07"}</span>
         </button>
         <h1>Phòng #{code}</h1>
         <span>{s.mode || (ai ? 'Chơi với máy' : local ? 'Hai người cùng máy' : 'Trực tuyến')}</span>
@@ -458,7 +458,7 @@ export default function Game() {
           {/* XO_MUSIC_VISIBLE_FIX */}
           <button type="button" className="xo-desktop-music"
           onClick={changeMusic} aria-pressed={musicOn}>
-          {musicOn ? '?? Nh?c: B?t' : '?? Nh?c: T?t'}
+          <span aria-hidden="true">{musicOn ? "\uD83D\uDD0A" : "\uD83D\uDD07"}</span>
         </button>
           <button type="button" className="wr-pill wr-back gm-back" onClick={leave}><Chev /><b>Quay lại</b></button>
 

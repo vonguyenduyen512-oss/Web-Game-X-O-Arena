@@ -122,3 +122,16 @@
   cursor: pointer !important;
   z-index: 9999 !important;
 }
+/* XO_SINGLE_SPEAKER_2026 */
+.xo-desktop-music {
+  width: 40px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  font-size: 20px !important;
+}
+.xo-mobile-music {
+  width: 44px !important;
+  height: 38px !important;
+  padding: 0 !important;
+  font-size: 20px !important;
+}
