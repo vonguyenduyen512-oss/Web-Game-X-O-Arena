@@ -95,3 +95,30 @@
   color: white;
   cursor: pointer;
 }
+
+
+/* XO_MUSIC_VISIBLE_FIX */
+.gm-s > .xo-desktop-music {
+  position: absolute !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  left: 14px !important;
+  top: 121px !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 116px !important;
+  height: 30px !important;
+  padding: 0 6px !important;
+  margin: 0 !important;
+  color: #ffffff !important;
+  background: linear-gradient(135deg,#5123bd,#23085f) !important;
+  border: 1px solid #bdacff !important;
+  border-radius: 11px !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  white-space: nowrap !important;
+  box-shadow: 0 0 9px #7454ed !important;
+  cursor: pointer !important;
+  z-index: 9999 !important;
+}

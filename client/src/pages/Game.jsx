@@ -449,15 +449,17 @@ export default function Game() {
     <div className="hm-root">
       <div className="hm-stage jr-stage wr-stage gm-stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
         <div className="wr-bg"><Backdrop /></div>
-        <button type="button" className="xo-desktop-music"
-          onClick={changeMusic} aria-pressed={musicOn}>
-          {musicOn ? '?? Nh?c: B?t' : '?? Nh?c: T?t'}
-        </button>
+
         {PETALS.slice(0, 10).map((p, i) => (
           <i key={i} className="hm-petal" style={{ left: p.x + '%', animationDuration: p.d + 's', animationDelay: p.delay + 's', transform: `scale(${p.s})` }} />
         ))}
 
         <div className="gm-s">
+          {/* XO_MUSIC_VISIBLE_FIX */}
+          <button type="button" className="xo-desktop-music"
+          onClick={changeMusic} aria-pressed={musicOn}>
+          {musicOn ? '?? Nh?c: B?t' : '?? Nh?c: T?t'}
+        </button>
           <button type="button" className="wr-pill wr-back gm-back" onClick={leave}><Chev /><b>Quay lại</b></button>
 
           {/* ===== tiêu đề phòng ===== */}
