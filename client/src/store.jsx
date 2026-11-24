@@ -75,6 +75,14 @@ export function AppProvider({ children }) {
     return fixExp({ ...u, main: isMain, avatar: !onlyDuyen && (u.avatar === '👧' || !u.avatar) ? 'duo' : u.avatar })
   })
   const [matches, setMatches] = useState(() => load('xo_matches', []))
+  // XO_XP_SYNC_FIX
+  useEffect(() => {
+    if (!user) return
+    const fixed = fixExp(user)
+    if (fixed.level !== user.level ||
+        fixed.exp !== user.exp ||
+        fixed.expMax !== user.expMax) setUser(fixed)
+  }, [user])
   const [settings, setSettings] = useState(() => ({ ...DEFAULT_SETTINGS, ...load('xo_settings', {}) }))
 
   const pulled = useRef(false)
@@ -234,8 +242,14 @@ useEffect(() => {
 
   const applyMatchBalance = (balance) => {
     if (!balance || !Number.isFinite(balance.coins)) return
-    setUser(u => u ? { ...u, coins: balance.coins, ...(Number.isFinite(balance.gems) ? { gems: balance.gems } : {}),
-      ...(u.main && balance.rev ? { rev: balance.rev, updatedAt: balance.updatedAt } : {}) } : u)
+    setUser(u => u ? fixExp({
+      ...u,
+      coins: balance.coins,
+      ...(Number.isFinite(balance.gems) ? { gems: balance.gems } : {}),
+      ...(Number.isFinite(balance.level) ? { level: balance.level } : {}),
+      ...(Number.isFinite(balance.exp) ? { exp: balance.exp } : {}),
+      ...(u.main && balance.rev ? { rev: balance.rev, updatedAt: balance.updatedAt } : {})
+    }) : u) // XO_XP_BALANCE_FIX
   }
 
   const addMatch = (m) => {
@@ -243,10 +257,11 @@ useEffect(() => {
     // Chỉ khách và trận chơi ngoại tuyến tự cập nhật tại máy.
     // Tài khoản đăng nhập chơi online do server xác nhận kết quả và lưu vàng.
     setUser((u) => {
-      if (!u || (m.onlineVerified && !u.guest) || u.main) return u
+      if (!u || (m.onlineVerified && !u.guest)) return u
+      if (u.main) return m.room === 'AI' ? giveExp(u,m.result) : u // XO_XP_AI_FIX
       const delta = m.result === 'win' ? 200 : m.result === 'lose' ? -200 : 100
       const gemDelta = m.result === 'win' ? 100 : m.result === 'lose' ? -100 : 50
-      return { ...u, coins: Math.max(0, (u.coins || 0) + delta), gems: Math.max(0, (u.gems || 0) + gemDelta), updatedAt: Date.now() }
+      return { ...(m.room === 'AI' ? giveExp(u,m.result) : u), coins: Math.max(0,(u.coins || 0) + delta), gems: Math.max(0,(u.gems || 0) + gemDelta), updatedAt: Date.now() }
     })
   }
 

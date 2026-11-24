@@ -198,7 +198,13 @@ export default function ProfileScreen() {
   const coins = matches.reduce((a, m) => a + (REWARD[m.result]?.[0] || 0), 0)
   const gems = matches.reduce((a, m) => a + (REWARD[m.result]?.[1] || 0), 0)
   const [rank, top] = tier(user.level)
-  const xp = Math.min(100, Math.round((user.exp / user.expMax) * 100))
+  // XO_XP_PROFILE_FIX
+  const xpMax = Number(user.expMax) > 0
+    ? Number(user.expMax)
+    : 300+(Math.max(1,Number(user.level)||1)-1)*100
+  const xpNow = Number(user.exp)||0
+  const xp = Math.max(0,Math.min(100,
+    Math.round(xpNow/xpMax*100)))
   const photo = photoOf(user.avatar)
   const soon = (n) => () => setToast(`${n}: tính năng sẽ bổ sung sau`)
   const doLogout = () => { logout(); nav('/login') }
@@ -250,7 +256,7 @@ export default function ProfileScreen() {
             <i style={{ width: `calc(${xp}% + 0px)`, minWidth: 100 }} />
             <span className="pf-lv-crown"><Crown w={26} h={20} /></span>
             <b>Lv.{user.level}</b>
-            <em>{fmt(user.exp)} / {fmt(user.expMax)}</em>
+            <em>{fmt(xpNow)} / {fmt(xpMax)}</em>
           </div>
           <div className="pf-online"><i />Trực tuyến</div>
 

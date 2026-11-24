@@ -41,7 +41,25 @@ const atomicSave = (file, data) => {
   persistGameData(file, data)
 }
 const saveUsers = () => atomicSave(DB_FILE, users)
-const safe = ({ hash, ...u }) => u
+// XO_XP_SERVER_FIX
+const xoXp = (u,result) => {
+  let level = Math.max(1,Math.floor(Number(u.level)||1))
+  let exp = Math.max(0,Number(u.exp)||0) +
+    ({win:100,draw:50,lose:20}[result]||0)
+  let expMax = 300 + (level-1)*100
+  while (exp >= expMax && level < 10000) {
+    exp -= expMax
+    level++
+    expMax = 300 + (level-1)*100
+  }
+  Object.assign(u,{level,exp,expMax})
+}
+const safe = ({ hash, ...u }) => ({
+      ...u,
+      level: Math.max(1,Number(u.level)||1),
+      exp: Number(u.exp)||0,
+      expMax: 300+(Math.max(1,Number(u.level)||1)-1)*100
+    })
 const sign = (u) => jwt.sign({ id: u.id }, SECRET, { expiresIn: '30d' })
 
 // ===== Tài khoản chính Nguyễn Duyên: lưu dữ liệu lên server (server/main-account.json) =====
@@ -943,6 +961,7 @@ const saveVerifiedMatch = (r, over) => {
       entry.user.gems = Math.max(
         0, (Number(entry.user.gems) || 0) + gemDelta
       )
+      xoXp(entry.user,result)
       entry.user.updatedAt = Date.now()
       entry.user.rev = (entry.user.rev || 0) + 1
       mainChanged = true
@@ -951,6 +970,7 @@ const saveVerifiedMatch = (r, over) => {
         matchId: id,
         coins: entry.user.coins,
         gems: entry.user.gems,
+        level: entry.user.level, exp: entry.user.exp, expMax: entry.user.expMax,
         rev: entry.user.rev,
         updatedAt: entry.user.updatedAt
       })
@@ -979,12 +999,13 @@ account.matches = [
       account.gems = Math.max(
         0, (Number(account.gems) || 0) + gemDelta
       )
+      xoXp(account,result)
       usersChanged = true
 
       io.to(p.id).emit('game:balance', {
         matchId: id,
         coins: account.coins,
-        gems: account.gems
+        gems: account.gems, level: account.level, exp: account.exp, expMax: account.expMax
       })
     }
   }
