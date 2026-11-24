@@ -40,13 +40,13 @@ export function unlockAudio() {
 }
 
 export function clickSound() {
-  tone(680, 0.06, 0.025)
-  tone(940, 0.05, 0.012, 'sine', 0.03)
+  tone(680, 0.06, 0.18)
+  tone(940, 0.05, 0.11, 'sine', 0.03)
 }
 
 export function moveSound() {
-  tone(310, 0.12, 0.065, 'triangle')
-  tone(470, 0.09, 0.025, 'sine', 0.03)
+  tone(310, 0.12, 0.20, 'triangle')
+  tone(470, 0.09, 0.12, 'sine', 0.03)
 }
 
 const notes = [
@@ -59,8 +59,8 @@ const notes = [
 function playMusicNote() {
   if (!inGame || !musicOn || !ctx || ctx.state !== 'running') return
   const n = notes[index % notes.length]
-  tone(n, 0.33, 0.012)
-  if (index % 4 === 0) tone(n / 2, 0.45, 0.008, 'triangle')
+  tone(n, 0.33, 0.055)
+  if (index % 4 === 0) tone(n / 2, 0.45, 0.03, 'triangle')
   index++
 }
 
