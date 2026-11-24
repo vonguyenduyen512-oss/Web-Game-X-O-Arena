@@ -135,3 +135,44 @@
   padding: 0 !important;
   font-size: 20px !important;
 }
+
+/* XO_SPEAKER_NO_FRAME_2026 */
+.gm-s > .xo-desktop-music {
+    position: absolute !important;
+    left: 25px !important;
+    top: 121px !important;
+    right: auto !important;
+    bottom: auto !important;
+
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    color: white !important;
+    font-size: 28px !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    z-index: 9999 !important;
+}
+
+.gm-s > .xo-desktop-music span {
+    font-size: 28px !important;
+    line-height: 1 !important;
+}
+
+.gm-s > .xo-desktop-music:hover {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    transform: scale(1.12);
+}
