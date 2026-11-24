@@ -176,3 +176,26 @@
     box-shadow: none !important;
     transform: scale(1.12);
 }
+
+/* XO_TURN_NO_FRAME_2026 */
+.gm-turn {
+    background: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.gm-turn::before,
+.gm-turn::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Giu lai chu va bieu tuong luot di */
+.gm-turn span,
+.gm-turn b,
+.gm-turn svg {
+    position: relative;
+    z-index: 1;
+}
