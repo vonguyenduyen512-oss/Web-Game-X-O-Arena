@@ -1,0 +1,71 @@
+/* X-O Arena: giao diện bàn chơi cho điện thoại; không tác động bản desktop. */
+.xo-mobile-game {
+  position: fixed; inset: 0; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(20px, env(safe-area-inset-bottom));
+  background: radial-gradient(circle at 50% 5%, #36238c, #0e0b3d 55%, #090821);
+  color: #f5f4ff; font-family: system-ui, sans-serif;
+}
+.xo-mobile-game * { box-sizing: border-box; }
+.xo-mobile-game button { font-family: inherit; cursor: pointer; touch-action: manipulation; }
+.xo-mobile-game button:disabled { opacity: .45; cursor: default; }
+.xo-mobile-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 42px; }
+.xo-mobile-header strong { color: #ffe38d; letter-spacing: 1px; font-size: 17px; }
+.xo-mobile-header button, .xo-mobile-board-top button {
+  color: #fff; background: #30217d; border: 1px solid #9b8eff; border-radius: 10px;
+  padding: 9px 11px; font-size: 13px; min-height: 40px;
+}
+.xo-mobile-room { text-align: center; margin: 12px 0; }
+.xo-mobile-room h1 { font-size: 21px; word-break: break-word; }
+.xo-mobile-room span { color: #c2c7f7; font-size: 13px; }
+.xo-mobile-scoreline { display: grid; grid-template-columns: minmax(0,1fr) 80px minmax(0,1fr); align-items: center; gap: 7px; }
+.xo-mobile-player { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.xo-mobile-player.foe { justify-content: flex-end; text-align: right; }
+.xo-mobile-player img, .xo-mobile-player > span { width: 35px; height: 35px; flex: 0 0 35px; border-radius: 50%; object-fit: cover; background: #4733a6; display: grid; place-items: center; }
+.xo-mobile-player div { min-width: 0; }
+.xo-mobile-player b { display: block; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.xo-mobile-player small { display: block; color: #b5b9ed; font-size: 11px; }
+.xo-mobile-timer { display: grid; justify-items: center; padding: 5px 2px; background: #261765; border: 1px solid #8c75ff; border-radius: 10px; }
+.xo-mobile-timer span { font-size: 10px; color: #ded5ff; }
+.xo-mobile-timer b { font-size: 18px; color: #ffdd78; font-variant-numeric: tabular-nums; }
+.xo-mobile-turn { margin: 12px 0; padding: 10px; background: #1d175b; border: 1px solid #766ded; border-radius: 12px; text-align: center; font-size: 14px; }
+.xo-mobile-turn b { color: #96efff; }
+.xo-mobile-board-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 8px 0; }
+.xo-mobile-board-top span { font-size: 12px; color: #dbd4ff; }
+.xo-mobile-board-top button { min-height: 36px; flex: 0 0 auto; padding: 7px; }
+.xo-mobile-board-scroll {
+  overflow-x: auto; overflow-y: hidden; max-width: 100%; width: 100%;
+  background: #101353; border: 2px solid #92b8ff; border-radius: 12px; padding: 7px;
+  scrollbar-width: thin; scrollbar-color: #a0b8ff #181552;
+  -webkit-overflow-scrolling: touch; overscroll-behavior-inline: contain;
+}
+.xo-mobile-board { --cell: 32px; display: grid; grid-template-columns: repeat(15, var(--cell)); grid-template-rows: repeat(15, var(--cell)); width: max-content; margin: auto; }
+.xo-mobile-board.is-large { --cell: 40px; }
+.xo-mobile-cell {
+  position: relative; display: grid; place-items: center; width: var(--cell); height: var(--cell);
+  background: #0c1b66; border: 1px solid #3a66a4; border-radius: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.xo-mobile-cell:not(:disabled):active { background: #225ca5; }
+.xo-mobile-cell.occupied { opacity: 1 !important; }
+.xo-mobile-cell.last { outline: 2px solid #ffcb65; outline-offset: -2px; }
+.xo-mobile-cell.won { background: #286d65; }
+.xo-mobile-cell .gm-x, .xo-mobile-cell .gm-o { width: 70%; height: 70%; }
+.xo-mobile-cell .gm-x path { stroke: #6bdfff; stroke-width: 3.4; fill: none; stroke-linecap: round; }
+.xo-mobile-cell .gm-o circle { stroke: #ff9cdd; stroke-width: 3.2; fill: none; }
+.xo-mobile-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
+.xo-mobile-actions button { background: #332479; color: #fff; border: 1px solid #a58fff; border-radius: 10px; padding: 11px 5px; min-height: 44px; font-size: 13px; font-weight: 650; }
+.xo-mobile-chat { border: 1px solid #7569db; background: #161148; border-radius: 12px; padding: 10px; margin-bottom: 12px; }
+.xo-mobile-chat h2 { font-size: 15px; margin: 0 0 7px; }
+.xo-mobile-messages { max-height: 110px; overflow-y: auto; font-size: 13px; overflow-wrap: anywhere; }
+.xo-mobile-messages p { margin: 4px 0; }
+.xo-mobile-messages b { color: #ffda81; }
+.xo-mobile-chat form { display: flex; gap: 7px; margin-top: 9px; }
+.xo-mobile-chat input { min-width: 0; flex: 1; border: 1px solid #7776dd; border-radius: 8px; background: #0a123b; color: #fff; padding: 10px; font-size: 16px; }
+.xo-mobile-chat form button { background: #4e3dc4; border: 1px solid #b4a7ff; border-radius: 8px; color: #fff; min-width: 55px; }
+@media (min-width: 620px) and (orientation: landscape) {
+  .xo-mobile-game { padding-left: max(14px, env(safe-area-inset-left)); padding-right: max(14px, env(safe-area-inset-right)); }
+  .xo-mobile-room { margin: 4px 0; }
+  .xo-mobile-board-scroll { max-width: 560px; margin: 0 auto; }
+  .xo-mobile-board { --cell: 32px; }
+}

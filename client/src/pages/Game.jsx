@@ -12,6 +12,7 @@ import '../components/join-fonts.css'
 import '../components/join.css'
 import '../components/waiting.css'
 import '../components/game.css'
+import '../components/game-mobile.css'
 
 /* Màn hình 10 – Phòng chơi / Bàn cờ Caro
    Stage 1280x720 tự thu phóng; nội dung (.gm-s) dựng theo toạ độ ảnh thiết kế 967x544 rồi phóng 1.3236 lần.
@@ -138,11 +139,45 @@ function GameBoard({ board, onCell, line, last, disabled }) {
   )
 }
 
+// Giao diện dành riêng cho thiết bị cảm ứng màn hình nhỏ; desktop giữ nguyên.
+function useMobileGame() {
+  const query = '(max-width: 1024px) and (pointer: coarse)'
+  const [mobile, setMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches)
+  useEffect(() => {
+    const media = window.matchMedia(query)
+    const update = () => setMobile(media.matches)
+    update()
+    media.addEventListener?.('change', update)
+    return () => media.removeEventListener?.('change', update)
+  }, [])
+  return mobile
+}
+
+function MobileBoard({ board, onCell, line, last, disabled, enlarged }) {
+  const winning = new Set((line || []).map(([x, y]) => `${x},${y}`))
+  return (
+    <div className="xo-mobile-board-scroll" role="region" aria-label="Bàn cờ Caro 15x15, vuốt ngang để xem hết" tabIndex={0}>
+      <div className={`xo-mobile-board ${enlarged ? 'is-large' : ''}`}>
+        {board.map((row, y) => row.map((v, x) => (
+          <button key={`${x}-${y}`} type="button"
+            className={`xo-mobile-cell ${v ? 'occupied' : ''} ${last?.x === x && last?.y === y ? 'last' : ''} ${winning.has(`${x},${y}`) ? 'won' : ''}`}
+            disabled={disabled || !!v} onClick={() => onCell(x, y)}
+            aria-label={`Hàng ${y + 1}, cột ${x + 1}${v ? ', quân ' + v : ''}`}>
+            {v === 'X' ? <PieceX /> : v === 'O' ? <PieceO /> : null}
+          </button>
+        )))}
+      </div>
+    </div>
+  )
+}
+
 export default function Game() {
   const { code } = useParams()
   const { user, addMatch, applyMatchBalance, logout } = useApp()
   const nav = useNavigate()
   const scale = useFit(1280, 720)
+  const mobile = useMobileGame()
+  const [enlarged, setEnlarged] = useState(false)
   const [toast, setToast] = useToast()
   const [s, dispatch] = useReducer(reducer, null, init)
   const ai = code === 'AI'
@@ -246,6 +281,72 @@ export default function Game() {
   const turnLabel = s.over ? REASON[s.over.reason] : mine ? user.name : opp.name
   const photo = photoOf(user.avatar)
   const oppPhoto = photoOf(opp.avatar)
+
+  // Điện thoại: giữ nguyên reducer, AI và sự kiện Socket.IO của bản desktop.
+  // Chỉ khác cách hiển thị và cỡ vùng chạm, không đổi API hoặc dữ liệu trận đấu.
+  if (mobile) return (
+    <main className="xo-mobile-game">
+      <header className="xo-mobile-header">
+        <button type="button" onClick={leave} aria-label="Quay lại">‹ Quay lại</button>
+        <strong>X-O ARENA</strong>
+        <button type="button" onClick={() => nav('/home')}>Trang chủ</button>
+      </header>
+      <div className="xo-mobile-room">
+        <h1>Phòng #{code}</h1>
+        <span>{s.mode || (ai ? 'Chơi với máy' : local ? 'Hai người cùng máy' : 'Trực tuyến')}</span>
+      </div>
+      <div className="xo-mobile-scoreline">
+        <div className="xo-mobile-player">
+          {photo ? <img src={photo} alt="" /> : <span>{user.avatar || 'X'}</span>}
+          <div><b>{user.name}</b><small>Quân {local ? 'X' : mySym}</small></div>
+        </div>
+        <div className="xo-mobile-timer"><span>Thời gian</span><b>{mm}</b></div>
+        <div className="xo-mobile-player foe">
+          <div><b>{opp.name}</b><small>Quân {local ? 'O' : mySym === 'X' ? 'O' : 'X'}</small></div>
+          {oppPhoto ? <img src={oppPhoto} alt="" /> : <span>{opp.avatar || 'O'}</span>}
+        </div>
+      </div>
+      <p className="xo-mobile-turn" aria-live="polite">
+        {s.over ? 'Kết thúc: ' : 'Lượt của: '}<b>{turnLabel}</b>
+      </p>
+      <div className="xo-mobile-board-top">
+        <span>Bàn cờ 15×15 · Có thể vuốt ngang</span>
+        <button type="button" onClick={() => setEnlarged(v => !v)}>
+          {enlarged ? 'Thu nhỏ ô' : 'Phóng to ô'}
+        </button>
+      </div>
+      <MobileBoard board={s.board} onCell={(x,y) => {
+        if (!playing) return
+        if (local) dispatch({ type: 'move', x, y })
+        else socket.emit('game:move', { x, y })
+      }} line={s.over?.line} last={last} disabled={!playing} enlarged={enlarged} />
+      <div className="xo-mobile-actions">
+        <button type="button" disabled={!!s.over} onClick={() => {
+          if (!window.confirm('Đầu hàng và nhận thua?')) return
+          if (local) dispatch({ type: 'resign', side: ai ? 'X' : s.turn })
+          else socket.emit('game:resign')
+        }}>Đầu hàng</button>
+        <button type="button" disabled={!!s.over || s.moves.length < 6} onClick={() => {
+          if (local) { if (window.confirm('Hai người đồng ý hòa trận?')) dispatch({ type: 'draw' }) }
+          else { socket.emit('draw:offer'); setToast('Đã gửi đề nghị hòa') }
+        }}>Đề nghị hòa</button>
+        <button type="button" onClick={leave}>Thoát phòng</button>
+      </div>
+      {!local && <section className="xo-mobile-chat">
+        <h2>Chat phòng</h2>
+        <div className="xo-mobile-messages" role="log" aria-live="polite">
+          {msgs.slice(-30).map((m, i) => <p key={i}><b>{m.from === 'me' ? user.name : m.from}: </b>{m.text}</p>)}
+          <span ref={chatEnd} />
+        </div>
+        <form onSubmit={send}>
+          <input value={draft} onChange={e => setDraft(e.target.value)} maxLength={200}
+            placeholder="Nhập tin nhắn..." aria-label="Tin nhắn" />
+          <button type="submit">Gửi</button>
+        </form>
+      </section>}
+      {toast}
+    </main>
+  )
 
   return (
     <div className="hm-root">
