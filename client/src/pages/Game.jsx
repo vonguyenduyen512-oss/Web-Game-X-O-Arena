@@ -7,6 +7,7 @@ import { Crown, PETALS, TopHud, useFit } from '../components/hud.jsx'
 import { Backdrop, BigCrown, ChatBubble, Chev, NeonFrame, ReadyPill, Silhouette } from './WaitingRoom.jsx'
 import { SIZE, TURN_TIME, aiMove, boardFromMoves, checkWin, createBoard } from '../lib/game.js'
 import { call, connect, socket } from '../lib/socket.js'
+import { enterGameMusic, leaveGameMusic, moveSound, isMusicEnabled, toggleGameMusic } from '../lib/gameAudio.js' // XO_SOUND_2026
 import '../components/home.css'
 import '../components/join-fonts.css'
 import '../components/join.css'
@@ -188,6 +189,21 @@ export default function Game() {
   const [draft, setDraft] = useState('')
   const saved = useRef(false)
   const chatEnd = useRef(null)
+  const previousMoves = useRef(0)
+  const [musicOn, setMusicOn] = useState(isMusicEnabled)
+
+  useEffect(() => {
+    enterGameMusic()
+    return () => leaveGameMusic()
+  }, [])
+
+  useEffect(() => {
+    const count = s.moves.length
+    if (count === previousMoves.current + 1) moveSound()
+    previousMoves.current = count
+  }, [s.moves.length])
+
+  const changeMusic = () => setMusicOn(toggleGameMusic())
 
   // Đồng hồ lượt
   useEffect(() => {
@@ -292,6 +308,10 @@ export default function Game() {
         <button type="button" onClick={() => nav('/home')}>Trang chủ</button>
       </header>
       <div className="xo-mobile-room">
+        <button type="button" className="xo-mobile-music"
+          onClick={changeMusic} aria-pressed={musicOn}>
+          {musicOn ? '?? Nh?c: B?t' : '?? Nh?c: T?t'}
+        </button>
         <h1>Phòng #{code}</h1>
         <span>{s.mode || (ai ? 'Chơi với máy' : local ? 'Hai người cùng máy' : 'Trực tuyến')}</span>
       </div>
@@ -352,6 +372,10 @@ export default function Game() {
     <div className="hm-root">
       <div className="hm-stage jr-stage wr-stage gm-stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
         <div className="wr-bg"><Backdrop /></div>
+        <button type="button" className="xo-desktop-music"
+          onClick={changeMusic} aria-pressed={musicOn}>
+          {musicOn ? '?? Nh?c: B?t' : '?? Nh?c: T?t'}
+        </button>
         {PETALS.slice(0, 10).map((p, i) => (
           <i key={i} className="hm-petal" style={{ left: p.x + '%', animationDuration: p.d + 's', animationDelay: p.delay + 's', transform: `scale(${p.s})` }} />
         ))}

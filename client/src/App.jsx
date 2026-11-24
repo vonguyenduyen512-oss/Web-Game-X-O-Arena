@@ -2,6 +2,8 @@
 import { Suspense, lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useApp } from './store.jsx'
+import { useEffect } from 'react'
+import { clickSound, unlockAudio } from './lib/gameAudio.js' // XO_SOUND_2026
 
 const Splash = lazy(() => import('./pages/Splash.jsx'))
 const Login = lazy(() => import('./pages/Login.jsx'))
@@ -48,6 +50,18 @@ function Private({ children }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    const onTap = e => {
+      const el = e.target instanceof Element
+        ? e.target.closest('button, a, [role="button"]')
+        : null
+      if (!el || el.matches(':disabled')) return
+      unlockAudio()
+      if (!el.matches('.gm-cell, .xo-mobile-cell')) clickSound()
+    }
+    document.addEventListener('pointerdown', onTap, true)
+    return () => document.removeEventListener('pointerdown', onTap, true)
+  }, [])
   const p = (el) => <Private>{el}</Private>
 
   return (
