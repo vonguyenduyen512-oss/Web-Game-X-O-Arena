@@ -241,7 +241,8 @@ export default function ModeSelect() {
   return (
     <div className="ms-root">
       <style>{CSS}</style>
-      <div className="ms-stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
+      <div className="ms-stage" style={{ width: Math.max(1280, window.innerWidth / Math.max(scale, 0.001)),
+transform: `translate(-50%, -50%) scale(${scale})` }}>
         {/* nền */}
         <div className="ms-bgimg" /><div className="ms-moon" />
         <Pagoda className="l" /><Pagoda className="r" />

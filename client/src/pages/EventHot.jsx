@@ -429,7 +429,8 @@ export default function EventHot() {
 
   return (
     <div className="hm-root">
-      <div className="hm-stage ev-stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
+      <div className="hm-stage ev-stage" style={{ width: Math.max(1280, window.innerWidth / Math.max(scale, 0.001)),
+transform: `translate(-50%, -50%) scale(${scale})` }}>
         <Defs />
         <div className="ev-bg" />
         <div className="ev-bokeh" />

@@ -214,7 +214,8 @@ export default function ProfileScreen() {
 
   return (
     <div className="hm-root">
-      <div className="hm-stage jr-stage wr-stage pf-stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
+      <div className="hm-stage jr-stage wr-stage pf-stage" style={{ width: Math.max(1280, window.innerWidth / Math.max(scale, 0.001)),
+transform: `translate(-50%, -50%) scale(${scale})` }}>
         <div className="pf-bg"><Backdrop /></div>
         {PETALS.slice(0, 12).map((p, i) => (
           <i key={i} className="hm-petal" style={{ left: p.x + '%', animationDuration: p.d + 's', animationDelay: p.delay + 's', transform: `scale(${p.s})` }} />

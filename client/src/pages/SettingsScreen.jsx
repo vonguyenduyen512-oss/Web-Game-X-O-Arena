@@ -71,7 +71,8 @@ export default function SettingsScreen() {
       <div
         className="hm-stage jr-stage wr-stage sx-stage"
         style={{
-          transform: `translate(-50%, -50%) scale(${scale})`
+          width: Math.max(1280, window.innerWidth / Math.max(scale, 0.001)),
+transform: `translate(-50%, -50%) scale(${scale})`
         }}
       >
         <div className="sx-bg"><Backdrop /></div>

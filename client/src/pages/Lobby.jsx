@@ -410,7 +410,8 @@ export default function Lobby() {
   color:#fff;
   text-shadow:0 1px 3px #000;
 }`}</style>
-      <div className="lb-stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
+      <div className="lb-stage" style={{ width: Math.max(1280, window.innerWidth / Math.max(scale, 0.001)),
+transform: `translate(-50%, -50%) scale(${scale})` }}>
         {/* nền */}
         <div className="lb-bgimg" /><div className="lb-moon" /><div className="lb-floor" /><div className="lb-vig" />
         {PETALS.map((p, i) => <span key={i} className="lb-petal" style={{ left: p.left, top: 0, animationDuration: p.dur + 's', animationDelay: p.delay + 's', transform: `scale(${p.s})` }} />)}

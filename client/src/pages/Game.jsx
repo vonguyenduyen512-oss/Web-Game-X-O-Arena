@@ -448,7 +448,8 @@ export default function Game() {
 
   return (
     <div className="hm-root">
-      <div className="hm-stage jr-stage wr-stage gm-stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
+      <div className="hm-stage jr-stage wr-stage gm-stage" style={{ width: Math.max(1280, window.innerWidth / Math.max(scale, 0.001)),
+transform: `translate(-50%, -50%) scale(${scale})` }}>
         <div className="wr-bg"><Backdrop /></div>
 
         {PETALS.slice(0, 10).map((p, i) => (

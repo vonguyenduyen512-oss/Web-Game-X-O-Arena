@@ -142,7 +142,8 @@ export default function JoinRoom() {
 
   return (
     <div className="hm-root">
-      <div className="hm-stage jr-stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
+      <div className="hm-stage jr-stage" style={{ width: Math.max(1280, window.innerWidth / Math.max(scale, 0.001)),
+transform: `translate(-50%, -50%) scale(${scale})` }}>
         <div className="jr-bg" />
         {PETALS.slice(0, 10).map((p, i) => (
           <i key={i} className="hm-petal" style={{ left: p.x + '%', animationDuration: p.d + 's', animationDelay: p.delay + 's', transform: `scale(${p.s})` }} />

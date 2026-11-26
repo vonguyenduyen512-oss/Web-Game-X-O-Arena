@@ -110,7 +110,7 @@ function useFit(w, h) {
     const vw = window.innerWidth
     const vh = window.innerHeight
     const scale = Math.min(vw / w, vh / h)
-    const landscape = window.matchMedia('(orientation: landscape) and (pointer: coarse)').matches
+    const landscape = vw >= vh
     return { scale, width: landscape ? Math.max(w, vw / Math.max(scale, 0.001)) : w }
   }
   const [fit, setFit] = useState(calc)
@@ -237,7 +237,7 @@ export default function Home() {
           <button className="hm-tile t1" onClick={() => nav('/events')}><Ico n="flame" size={34} fill="currentColor" sw={1} /><span>Sự kiện<br />Hot</span><em>!</em></button>
         </div>
         {/* Hình trang trí cạnh Sự kiện Hot, không phải nút bấm */}
-        <div aria-hidden="true" style={{position:'absolute',left:'calc(634px + var(--hm-extra, 0px))',top:528,width:296,height:98,borderRadius:14,overflow:'hidden',border:'1.5px solid rgba(180,120,255,.8)',boxShadow:'0 0 14px rgba(170,80,255,.45)',pointerEvents:'none'}}><img src="/img/home-event-decoration.png" alt="" style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}} /></div>
+        <div className="hm-event-decoration" aria-hidden="true" style={{position:'absolute',left:'calc(634px + var(--hm-extra, 0px))',top:528,width:296,height:98,borderRadius:14,overflow:'hidden',border:'1.5px solid rgba(180,120,255,.8)',boxShadow:'0 0 14px rgba(170,80,255,.45)',pointerEvents:'none'}}><img src="/img/home-event-decoration.png" alt="" style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}} /></div>
 
         {/* ===== banner + chat ===== */}
         <div className="hm-banner" onClick={() => nav(sl.to)} key={slide}>

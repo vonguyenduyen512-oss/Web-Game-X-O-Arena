@@ -155,7 +155,8 @@ export default function CreateRoom() {
 
   return (
     <div className="hm-root">
-      <div className="hm-stage cr-stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
+      <div className="hm-stage cr-stage" style={{ width: Math.max(1280, window.innerWidth / Math.max(scale, 0.001)),
+transform: `translate(-50%, -50%) scale(${scale})` }}>
         {/* ===== nền + nhân vật ===== */}
         <HomeBackdrop />
         <div className="cr-glow" />
