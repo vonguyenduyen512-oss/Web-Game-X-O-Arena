@@ -349,7 +349,7 @@ useEffect(() => {
         body: JSON.stringify({ credential, resumeOnly })
       })
       const data = await res.json()
-      if (!res.ok || !data.token || !data.user) return data.error || 'Đăng nhập khách thất bại.'
+      if (res.status === 404) return 'Backend online chưa cập nhật chức năng đăng nhập khách.'; if (!res.ok || !data.token || !data.user) return data.error || 'Đăng nhập khách thất bại.'
       localStorage.setItem('xo_player_token', data.token)
       setUser(fixExp({ ...data.user, main: false, guest: false }))
       setMatches(mergeHistory(data.matches || [], load(offlineKey(data.user), [])))
