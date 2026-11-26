@@ -109,3 +109,60 @@
   .wr-spin, .wr-vs { animation: none; }
   .wr-stage .hm-petal { display: none; }
 }
+
+
+/* XO-ARENA-EQUAL-WAITING-AVATARS */
+/* Hai avatar trong man cho co kich thuoc bang nhau */
+.wr-card.me .wr-avatar,
+.wr-card.opp .wr-oavatar {
+    left: 14px;
+    top: 7px;
+    width: 178px;
+    height: 178px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* Hinh anh va SVG giu dung ti le */
+.wr-card.opp .wr-oavatar > svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.wr-card.opp .wr-oavatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Can deu phan thong tin */
+.wr-card.opp .wr-info.opp {
+    top: 163px;
+    height: 79px;
+}
+
+.wr-card.opp.joined .wr-name {
+    top: 168px;
+}
+
+.wr-card.opp.joined .wr-lv {
+    top: 190px;
+}
+
+.wr-card.opp.joined .wr-ready-pos {
+    top: 209px;
+}
+
+.wr-card.opp .wr-wait {
+    top: 174px;
+}
+
+.wr-card.opp .wr-spin {
+    top: 212px;
+}
+
+.wr-card.opp.joined .wr-oavatar .emoji {
+    font-size: 96px;
+}
