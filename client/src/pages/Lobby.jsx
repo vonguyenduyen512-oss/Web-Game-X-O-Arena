@@ -462,10 +462,8 @@ transform: `translate(-50%, -50%) scale(${scale})` }}>
         <button className="lb-ibtn" style={{ left: 1216 }} onClick={() => nav('/settings')} aria-label="Cài đặt"><Gear /></button>
 
         {/* menu trái */}
-        <div className="lb-a lb-act"><Home />Sảnh chờ</div>
-        <nav className="lb-a lb-side">
-          {menu.map(([ic, label, go]) => <button key={label} className="lb-it" onClick={go}>{ic}{label}</button>)}
-        </nav>
+        <button className="lb-a lb-act" onClick={() => nav("/home")}><Home />Quay lại</button>
+
 
         {/* thông tin phòng */}
         <div className="lb-a lb-roomw">

@@ -267,3 +267,60 @@
     text-align: center !important;
     overflow: visible;
 }
+/* XO ARENA - EVENT LAYOUT REPAIR V1 */
+
+/* Dua toan bo bo cuc su kien ve chinh giua */
+@media (orientation: landscape) {
+  .ev-stage .ev-s {
+    left: calc(50% - 640px) !important;
+  }
+
+  /* Bo dich chuyen cu gay lech */
+  .ev-stage .ev-s > * {
+    translate: none !important;
+  }
+
+  /* Can giua khung noi dung sau khi bo menu chinh */
+  .ev-stage .ev-main {
+    left: 80px !important;
+  }
+
+  .ev-stage .ev-title {
+    left: 302px !important;
+  }
+}
+
+/* Khoi phuc giao dien nut Quay lai */
+.ev-stage .ev-s button.xo-event-back {
+  position: absolute !important;
+  left: 15px !important;
+  top: 82px !important;
+  width: 125px !important;
+  height: 40px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border: 1.5px solid #c7a1ff !important;
+  border-radius: 12px !important;
+
+  background: linear-gradient(
+    135deg,
+    #8e22ef,
+    #4a0baf
+  ) !important;
+
+  box-shadow: 0 0 14px rgba(184,104,255,.65) !important;
+
+  color: white !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+
+  cursor: pointer;
+  z-index: 30;
+}
+
+.ev-stage .ev-s button.xo-event-back:hover {
+  filter: brightness(1.18);
+}

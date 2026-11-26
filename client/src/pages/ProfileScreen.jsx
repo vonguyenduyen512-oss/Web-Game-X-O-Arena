@@ -232,7 +232,7 @@ transform: `translate(-50%, -50%) scale(${scale})` }}>
           </div>
 
           {/* ===== menu trái ===== */}
-          {NAV.map((n, i) => (
+          {NAV.map((n, i) => ({ n, i })).filter(({ n }) => n.k === "back").map(({ n, i }) => (
             <button key={n.k} type="button" className={`pf-nav ${n.k === 'profile' ? 'on' : ''}`} style={{ top: 100 + i * 48 - (i > 1 ? 4 : 0) }}
               onClick={n.to && n.k !== 'profile' ? () => nav(n.to) : undefined}>
               {n.icon}<b>{n.label}</b>

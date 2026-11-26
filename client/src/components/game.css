@@ -139,3 +139,30 @@
 .gm-oav { border-radius: 50%; overflow: visible; }
 .gm-oav img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .gm-oav .emoji { position: absolute; inset: 0; display: grid; place-items: center; font-size: 54px; font-weight: 400; border-radius: 50%; background: radial-gradient(circle at 50% 35%, #5a3ec8, #1c1470); }
+
+/* XO ARENA - FIX AI STATUS ALIGNMENT */
+.gm-card.opp .gm-stat {
+    left: 4px !important;
+    top: 155px !important;
+    width: 156px !important;
+    height: 21px !important;
+    padding: 0 5px !important;
+    box-sizing: border-box !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    border-radius: 10px !important;
+}
+
+.gm-card.opp .gm-stat i {
+    flex: 0 0 7px !important;
+    width: 7px !important;
+    height: 7px !important;
+}

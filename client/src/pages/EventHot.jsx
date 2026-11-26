@@ -460,14 +460,7 @@ transform: `translate(-50%, -50%) scale(${scale})` }}>
           </div>
 
           {/* ===== menu trái ===== */}
-          <nav className="ev-nav">
-            {NAV.map(([to, ic, label], i) => (
-              <button key={to} type="button" className={`ev-nav-i c-${ic} ${i === 0 ? 'on' : ''}`} style={{ top: 3 + i * 41 }} onClick={() => nav(to)}>
-                <Ico n={ic} size={17} fill={ic === 'home' ? 'currentColor' : 'none'} sw={ic === 'home' ? 1.5 : 2.2} />
-                <b>{label}</b>
-              </button>
-            ))}
-          </nav>
+          <button type="button" className="xo-event-back" onClick={() => nav("/home")}>Quay lại</button>
 
           {/* ===== khung lớn ===== */}
           <div className="ev-main">

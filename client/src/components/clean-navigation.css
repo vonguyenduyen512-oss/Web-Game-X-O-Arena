@@ -1,0 +1,36 @@
+.xo-event-back {
+    position: absolute;
+    left: 16px;
+    top: 82px;
+    width: 125px;
+    height: 42px;
+    border: 1px solid #bda0ff;
+    border-radius: 12px;
+    background: linear-gradient(135deg,#7600d9,#310075);
+    color: white;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+    z-index: 20;
+}
+
+.lb-stage .lb-act {
+    cursor: pointer;
+}
+
+.pf-stage .pf-nav,
+.hs-stage .hs-nav,
+.sx-stage .sx-nav,
+.hm-stage.lb-stage .lb-nav {
+    cursor: pointer;
+}
+
+@media (orientation: landscape) {
+    .pf-stage .wr-s > :not(.pf-nav),
+    .hs-stage .hs-s > :not(.hs-nav),
+    .sx-stage .sx-s > :not(.sx-nav),
+    .hm-stage.lb-stage .lb-s > :not(.lb-nav),
+    .ev-stage .ev-s > :not(.xo-event-back) {
+        translate: calc(var(--xo-inner-half, 0px) - 45px) 0;
+    }
+}

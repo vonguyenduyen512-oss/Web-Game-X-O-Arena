@@ -94,7 +94,7 @@ transform: `translate(-50%, -50%) scale(${scale})`
         ))}
 
         <div className="sx-s">
-          {NAV.map((n, i) => {
+          {NAV.map((n, i) => ({ n, i })).filter(({ n }) => n.k === "back").map(({ n, i }) => {
             const on = n.k === 'settings'
 
             return (

@@ -131,7 +131,7 @@ transform: `translate(-50%, -50%) scale(${scale})` }}>
 
         <div className="hs-s">
           {/* ===== menu trái ===== */}
-          {NAV.map((n, i) => {
+          {NAV.map((n, i) => ({ n, i })).filter(({ n }) => n.k === "back").map(({ n, i }) => {
             const on = n.k === 'history'
             return (
               <button key={n.k} type="button" className={`hs-nav ${on ? 'on' : ''}`} style={{ top: [98, 160, 209, 258, 306, 353][i] }}

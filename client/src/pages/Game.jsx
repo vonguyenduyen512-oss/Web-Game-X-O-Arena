@@ -524,7 +524,7 @@ transform: `translate(-50%, -50%) scale(${scale})` }}>
             <div className="gm-oav">{oppPhoto ? <img src={oppPhoto} alt="" draggable={false} /> : opp.avatar ? <b className="emoji"><XoAvatar value={opp.avatar}/></b> : <Silhouette />}<span className="ring" /></div>
             <div className="gm-info opp" />
             <div className="gm-name"><span>{opp.name}</span></div>
-            <div className="gm-lv">{ai ? 'Độ khó: Trung bình' : `Lv.${opp?.level ?? 1}`}</div>
+            {!ai && <div className="gm-lv">Lv.{opp?.level ?? 1}</div>}
             <div className="gm-stat"><i />{(() => { const o = local ? 'O' : mySym === 'X' ? 'O' : 'X'; return s.turn === o && !s.over ? `Đang đánh (${o})` : `Quân ${o} · chờ lượt` })()}</div>
           </section>
 

@@ -163,6 +163,78 @@ transform: `translate(-50%, -50%) scale(${scale})` }}>
         {/* ===== nền + nhân vật ===== */}
         <HomeBackdrop />
         <div className="cr-glow" />
+        <div className="cr-cosmic" aria-hidden="true">
+          <div className="cr-cosmic-aura" />
+          <svg viewBox="0 0 260 290" className="cr-cosmic-art">
+            <defs>
+              <linearGradient id="crMagicBlue" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#d4fbff"/>
+                <stop offset=".5" stopColor="#61ceff"/>
+                <stop offset="1" stopColor="#8b65ff"/>
+              </linearGradient>
+              <linearGradient id="crMagicPink" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#fff1fc"/>
+                <stop offset=".6" stopColor="#fa74ff"/>
+                <stop offset="1" stopColor="#8964ff"/>
+              </linearGradient>
+              <filter id="crMagicGlow" x="-80%" y="-80%" width="260%" height="260%">
+                <feGaussianBlur stdDeviation="5" result="blur"/>
+                <feMerge>
+                  <feMergeNode in="blur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+
+            <g className="cr-cosmic-rings">
+              <ellipse cx="130" cy="139" rx="116" ry="73"
+                transform="rotate(-28 130 139)"
+                fill="none" stroke="#8acfff" strokeWidth="2.2"
+                strokeDasharray="9 6" opacity=".8"/>
+              <ellipse cx="130" cy="139" rx="83" ry="119"
+                transform="rotate(24 130 139)"
+                fill="none" stroke="#df79ff" strokeWidth="2"
+                strokeDasharray="3 8" opacity=".75"/>
+              <circle cx="130" cy="139" r="69"
+                fill="rgba(104,57,212,.15)"
+                stroke="#bcb3ff" strokeWidth="1.5" opacity=".9"/>
+            </g>
+
+            <g filter="url(#crMagicGlow)">
+              <path d="M130 58 L146 105 L191 120 L146 135 L130 183 L114 135 L69 120 L114 105 Z"
+                fill="url(#crMagicBlue)" opacity=".9"/>
+              <path d="M130 83 L139 110 L166 120 L139 130 L130 157 L121 130 L94 120 L121 110 Z"
+                fill="#f4f9ff"/>
+              <path d="M130 59 L130 181 M70 120 L190 120"
+                stroke="#e8ffff" strokeWidth="1" opacity=".65"/>
+            </g>
+
+            <g className="cr-cosmic-x" stroke="url(#crMagicBlue)"
+              strokeWidth="10" strokeLinecap="round" filter="url(#crMagicGlow)">
+              <path d="M43 70 L69 96 M69 70 L43 96"/>
+            </g>
+
+            <g className="cr-cosmic-o" fill="none"
+              stroke="url(#crMagicPink)" strokeWidth="10"
+              filter="url(#crMagicGlow)">
+              <circle cx="204" cy="200" r="18"/>
+            </g>
+
+            <g fill="#fff4ff" filter="url(#crMagicGlow)">
+              <circle cx="28" cy="152" r="3"/>
+              <circle cx="221" cy="82" r="4"/>
+              <circle cx="87" cy="239" r="3"/>
+              <circle cx="187" cy="39" r="2.5"/>
+              <path d="M27 35v20 M17 45h20" stroke="#fff4ff" strokeWidth="2"/>
+              <path d="M223 241v19 M213 250h20" stroke="#8deaff" strokeWidth="2"/>
+              <path d="M172 246v12 M166 252h12" stroke="#ffa7ff" strokeWidth="2"/>
+            </g>
+          </svg>
+          <div className="cr-cosmic-label">
+            <strong>X-O ARENA</strong>
+            <span>SẴN SÀNG CHIẾN ĐẤU</span>
+          </div>
+        </div>
         <div className="cr-floor" />
         <img className="cr-girl" src="/img/create-girl.png" alt="" />
 
@@ -199,16 +271,7 @@ transform: `translate(-50%, -50%) scale(${scale})` }}>
         </div>
 
         {/* ===== menu trái ===== */}
-        <nav className="cr-side">
-          {SIDE.map(([to, ic, label, k]) => (
-            <NavLink key={to} to={to} className={({ isActive }) => `hm-nav ${k} ${isActive ? 'on' : ''}`}>
-              <Ico n={ic} size={22} fill={ic === 'home' ? 'currentColor' : 'none'} /><span>{label}</span>
-            </NavLink>
-          ))}
-          <a href="/login" className="hm-nav k-exit" onClick={(e) => { e.preventDefault(); doLogout() }}>
-            <Ico n="exit" size={22} /><span>Thoát</span>
-          </a>
-        </nav>
+
 
         {/* ===== thanh trên ===== */}
         <TopHud user={user} soon={soon} onProfile={() => nav('/profile')} onSettings={() => nav('/settings')} onLogout={doLogout} />

@@ -272,7 +272,7 @@ transform: `translate(-50%, -50%) scale(${scale})` }}>
           <Scene />
 
           {/* ===== menu trái ===== */}
-          {NAV.map((n, i) => {
+          {NAV.map((n, i) => ({ n, i })).filter(({ n }) => n.k === "back").map(({ n, i }) => {
             const on = n.k === 'rank'
             return (
               <button key={n.k} type="button" className={`lb-nav ${on ? 'on' : ''} ${n.k === 'back' ? 'back' : ''}`} style={{ top: NAV_TOPS[i] }}

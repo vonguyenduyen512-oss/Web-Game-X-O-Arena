@@ -347,7 +347,7 @@ transform: `translate(-50%, -50%) scale(${scale})` }}>
           <div className="rs-side opp">
             <div className="rs-av rs-av-opp">{photoOf(opp.avatar) ? <div className="rs-av-pic rs-av-pic-opp"><img src={photoOf(opp.avatar)} alt="" draggable={false} /></div> : opp.avatar ? <div className="rs-av-pic rs-av-pic-opp"><b className="emoji"><XoAvatar value={opp.avatar}/></b></div> : <Silhouette />}<span className="rs-av-ring opp" /></div>
             <div className="rs-name"><span>{opp.name}</span></div>
-            <div className="rs-lv">Lv.{opp.level}</div>
+            {match.room !== "AI" && <div className="rs-lv">Lv.{opp.level}</div>}
             <PlayerTag kind={oppKind} />
           </div>
 

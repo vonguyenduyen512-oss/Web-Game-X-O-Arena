@@ -155,3 +155,289 @@
   border-radius: 14px; border: 1.5px solid rgba(130, 130, 255, .8); font-size: 12.5px; font-weight: 500; color: #fff;
   background: linear-gradient(180deg, rgba(24, 28, 120, .92), rgba(10, 12, 74, .95)); box-shadow: 0 0 12px rgba(100, 100, 255, .5); }
 .cr-net svg { filter: drop-shadow(0 0 5px rgba(46, 234, 122, .8)); }
+
+
+/* XO ARENA - CREATE ROOM PREMIUM EFFECT V3 */
+
+/* Anh nhan vat: giu dung ti le va hoa vao nen */
+.cr-stage .cr-girl {
+    left: 148px;
+    top: 70px;
+    width: 285px;
+    height: auto;
+    aspect-ratio: 2 / 3;
+    object-fit: contain;
+
+    -webkit-mask-image:
+        linear-gradient(
+            to bottom,
+            #000 0%,
+            #000 74%,
+            rgba(0,0,0,.88) 82%,
+            rgba(0,0,0,.45) 92%,
+            transparent 100%
+        );
+
+    mask-image:
+        linear-gradient(
+            to bottom,
+            #000 0%,
+            #000 74%,
+            rgba(0,0,0,.88) 82%,
+            rgba(0,0,0,.45) 92%,
+            transparent 100%
+        );
+
+    filter:
+        drop-shadow(0 0 18px rgba(151,97,255,.55))
+        drop-shadow(0 0 28px rgba(94,176,255,.28));
+
+    animation: crPremiumFloat 6s ease-in-out infinite;
+}
+
+/* Quang sang sau nhan vat */
+.cr-stage .cr-glow::before {
+    content: "";
+    position: absolute;
+    left: 86px;
+    top: 112px;
+    width: 365px;
+    height: 405px;
+    border-radius: 50%;
+    pointer-events: none;
+
+    background:
+        radial-gradient(
+            ellipse at 50% 47%,
+            rgba(134,184,255,.32) 0%,
+            rgba(164,75,255,.24) 38%,
+            rgba(142,52,236,.08) 62%,
+            transparent 78%
+        );
+
+    box-shadow:
+        0 0 95px rgba(150,73,250,.15);
+
+    animation: crAuraPulse 6s ease-in-out infinite;
+}
+
+/* Vong nang luong trong suot */
+.cr-stage .cr-glow::after {
+    content: "";
+    position: absolute;
+    left: 100px;
+    top: 164px;
+    width: 325px;
+    height: 325px;
+    border-radius: 50%;
+    box-sizing: border-box;
+    pointer-events: none;
+
+    border: 1.5px solid rgba(147,190,255,.23);
+
+    background:
+        radial-gradient(
+            circle,
+            transparent 55%,
+            rgba(144,80,255,.08) 68%,
+            transparent 73%
+        );
+
+    box-shadow:
+        0 0 25px rgba(119,112,255,.12),
+        inset 0 0 35px rgba(130,98,255,.09);
+
+    animation: crRingPulse 7s ease-in-out infinite;
+}
+
+/* Chuyen dong cham, nhe */
+@keyframes crPremiumFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-7px);
+    }
+}
+
+@keyframes crAuraPulse {
+    0%, 100% {
+        opacity: .65;
+        transform: scale(.98);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.04);
+    }
+}
+
+@keyframes crRingPulse {
+    0%, 100% {
+        opacity: .45;
+        transform: scale(1);
+    }
+    50% {
+        opacity: .85;
+        transform: scale(1.035);
+    }
+}
+
+/* Khong them hieu ung cu khi xem tren dien thoai doc */
+@media (orientation: portrait) {
+    .cr-stage .cr-glow::before,
+    .cr-stage .cr-glow::after {
+        display: none;
+    }
+}
+
+/* Ho tro nguoi dung muon giam chuyen dong */
+@media (prefers-reduced-motion: reduce) {
+    .cr-stage .cr-girl,
+    .cr-stage .cr-glow::before,
+    .cr-stage .cr-glow::after {
+        animation: none !important;
+    }
+}
+/* XO ARENA - CREATE ROOM COSMIC MAGIC V4 */
+
+/* Bo cac hinh XO trang tri cu */
+.cr-stage::before,
+.cr-stage::after {
+    content: none !important;
+    display: none !important;
+}
+
+.cr-stage .cr-glow::before,
+.cr-stage .cr-glow::after {
+    display: none !important;
+}
+
+/* Cum nang luong ben trai nhan vat */
+.cr-cosmic {
+    position: absolute;
+    left: 9px;
+    top: 192px;
+    width: 260px;
+    height: 337px;
+    z-index: 1;
+    pointer-events: none;
+    isolation: isolate;
+}
+
+.cr-cosmic-aura {
+    position: absolute;
+    inset: 7px -10px 14px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 50% 42%,
+            rgba(123,218,255,.38),
+            rgba(162,77,255,.28) 35%,
+            rgba(255,95,226,.12) 60%,
+            transparent 77%);
+    filter: blur(9px);
+    animation: crAuraMove 5s ease-in-out infinite;
+}
+
+.cr-cosmic-art {
+    position: relative;
+    display: block;
+    width: 260px;
+    height: 290px;
+    overflow: visible;
+    filter: drop-shadow(0 0 14px rgba(135,110,255,.55));
+    animation: crMagicFloat 6s ease-in-out infinite;
+}
+
+.cr-cosmic-rings {
+    transform-origin: 130px 139px;
+    animation: crMagicRotate 32s linear infinite;
+}
+
+.cr-cosmic-x {
+    animation: crMagicShine 3s ease-in-out infinite;
+}
+
+.cr-cosmic-o {
+    animation: crMagicShine 3s ease-in-out -1.5s infinite;
+}
+
+.cr-cosmic-label {
+    position: absolute;
+    top: 267px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    text-align: center;
+    text-shadow: 0 0 12px rgba(120,190,255,.85);
+}
+
+.cr-cosmic-label strong {
+    font-size: 19px;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+    color: #edfaff;
+}
+
+.cr-cosmic-label span {
+    color: #ffd580;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+/* Hinh nhan vat o tren anh sang */
+.cr-stage .cr-girl {
+    z-index: 2;
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        #000 0%,
+        #000 68%,
+        rgba(0,0,0,.88) 79%,
+        rgba(0,0,0,.4) 91%,
+        transparent 100%
+    );
+    mask-image: linear-gradient(
+        to bottom,
+        #000 0%,
+        #000 68%,
+        rgba(0,0,0,.88) 79%,
+        rgba(0,0,0,.4) 91%,
+        transparent 100%
+    );
+}
+
+/* Chuyen dong */
+@keyframes crMagicFloat {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-9px); }
+}
+
+@keyframes crMagicRotate {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes crMagicShine {
+    0%,100% { opacity: .65; }
+    50% { opacity: 1; }
+}
+
+@keyframes crAuraMove {
+    0%,100% { opacity: .65; transform: scale(.96); }
+    50% { opacity: 1; transform: scale(1.08); }
+}
+
+@media (orientation:portrait) {
+    .cr-cosmic { display: none; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+    .cr-cosmic,
+    .cr-cosmic *,
+    .cr-stage .cr-girl {
+        animation: none !important;
+    }
+}

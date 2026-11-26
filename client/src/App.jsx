@@ -1,3 +1,4 @@
+import './components/clean-navigation.css'
 import { Suspense, lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useApp } from './store.jsx'
