@@ -53,6 +53,21 @@ const fixExp = (u) => {
   return { ...u, level, exp, expMax, id: u.main && MAIN_ACCOUNTS[normName(u.name || '')] ? MAIN_ACCOUNTS[normName(u.name)].id : u.id }
 }
 
+// EXP offline: dùng cùng quy tắc thưởng đã thiết lập cho AI.
+const giveExp = (u, result) => fixExp({ ...u,
+  level: Math.max(1, Number(u.level) || 1),
+  exp: Math.max(0, Number(u.exp) || 0) + ({ win: 100, draw: 50, lose: 20 }[result] || 0)
+})
+const offlineKey = (u) => u && !u.guest && u.id ? 'xo_offline_matches_' + u.id : null
+const mergeHistory = (matches, offline) => {
+  const seen = new Set()
+  return [...matches, ...offline].filter(m => {
+    if (!m || seen.has(m.id)) return false
+    seen.add(m.id)
+    return true
+  }).sort((a,b) => (Date.parse(b.at) || 0) - (Date.parse(a.at) || 0))
+}
+
 // Đồng bộ tài khoản chính với server (qua proxy /api của Vite)
 const postMain = (path, key, body = {}) =>
   fetch('/api/main' + path, {
@@ -264,6 +279,10 @@ useEffect(() => {
   }
 
   const addMatch = (m) => {
+    const key = offlineKey(user)
+    if (key && (m.room === 'AI' || m.room === 'LOCAL')) {
+      save(key, mergeHistory([m], load(key, [])))
+    }
     setMatches((list) => [m, ...list])
     // Chỉ khách và trận chơi ngoại tuyến tự cập nhật tại máy.
     // Tài khoản đăng nhập chơi online do server xác nhận kết quả và lưu vàng.
@@ -419,7 +438,7 @@ const updateProfile = async (patch) => {
 
   return (
     <Ctx.Provider value={{
-      user, matches, settings, setSettings,
+      user, matches: mergeHistory(matches, offlineKey(user) ? load(offlineKey(user), []) : []), settings, setSettings,
       login, register, requestRegisterOtp, verifyRegisterOtp, googleLogin, guestLogin, logout, addMatch, applyMatchBalance, updateProfile, renameProfile, claimEventReward, checkInToday,
     }}>
       {children}

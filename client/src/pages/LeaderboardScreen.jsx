@@ -2,7 +2,7 @@ import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { photoOf } from '../lib/avatar.js'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Modal, useToast } from '../components/Layout.jsx'
+import { useToast } from '../components/Layout.jsx'
 import { useApp } from '../store.jsx'
 import { Ico, PETALS, TopHud, useFit } from '../components/hud.jsx'
 import { Backdrop, NeonFrame } from './WaitingRoom.jsx'
@@ -222,37 +222,21 @@ export default function LeaderboardScreen() {
   const nav = useNavigate()
   const scale = useFit(1280, 720)
   const [toast, setToast] = useToast()
-  const [tab, setTab] = useState('global')
   const [page, setPage] = useState(1)
   const [updated, setUpdated] = useState(() => stamp())
   const [spin, setSpin] = useState(false)
   const [players, setPlayers] = useState([]) // dữ liệu thật từ server
   const [err, setErr] = useState(false)
-  const [friends, setFriends] = useState([]) // bạn bè thật (đã chấp nhận)
-  const [incoming, setIncoming] = useState([]) // lời mời kết bạn đang chờ
-  const [fOpen, setFOpen] = useState(false)
-  const [fName, setFName] = useState('')
-  const fcall = useCallback((action, to) => fetch('/api/friends', {
-    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('xo_player_token') || ''}` },
-    body: JSON.stringify({ me: user?.name, myName: user?.name, action, to }),
-  }).then(async (r) => ({ ok: r.ok, ...(await r.json()) })).then((d) => {
-    if (d.ok) { setFriends(d.friends || []); setIncoming(d.incoming || []) }
-    return d
-  }).catch(() => ({ ok: false, error: 'Không kết nối được server.' })), [user?.name])
   const load = useCallback(() => fetch('/api/leaderboard').then((r) => r.json())
     .then((d) => { setPlayers(d.players || []); setErr(false); setUpdated(stamp()) })
     .catch(() => setErr(true)), [])
   useEffect(() => { load() }, [load])
-  useEffect(() => { if (user && !user.guest) fcall('list') }, [fcall]) // eslint-disable-line react-hooks/exhaustive-deps
   if (!user) return null
 
   const myKey = norm(user.name)
   const all = players.map((p) => (norm(p.name) === myKey ? { ...p, me: true, level: user.level, avatar: user.avatar } : p))
   const inList = all.some((p) => p.me)
-  const meEntry = all.find((p) => p.me) || { me: true, name: user.name, level: user.level, avatar: user.avatar, wins: 0, score: 0 }
-  const byScore = (a, b) => b.score - a.score || b.wins - a.wins
-  const real = tab === 'global' ? all
-    : [...friends.map((f) => ({ ...f, me: false })), meEntry].sort(byScore) // tab Bạn bè: mình + bạn bè
+  const real = all
   const list = inList || guestOut(user) ? real : [...real, { me: true, name: user.name, level: user.level, avatar: user.avatar, wins: 0, score: 0 }]
   const ranked = list.map((p, i) => ({ ...p, rank: i + 1 }))
   const top = ranked.slice(0, 3)
@@ -268,17 +252,8 @@ export default function LeaderboardScreen() {
   const refresh = () => {
     if (spin) return
     setSpin(true)
-    Promise.all([load(), user.guest ? null : fcall('list')]).finally(() => setTimeout(() => setSpin(false), 500))
+    Promise.resolve(load()).finally(() => setTimeout(() => setSpin(false), 500))
   }
-  const doFriend = async (action, to) => {
-    const d = await fcall(action, to)
-    if (!d.ok) return setToast(d.error || 'Có lỗi xảy ra')
-    if (action === 'add') { setFName(''); setToast('Đã gửi lời mời kết bạn') }
-    if (action === 'accept') setToast('Đã chấp nhận kết bạn')
-    if (action === 'remove') setToast('Đã xóa bạn')
-    return undefined
-  }
-  const pick = (t) => { setTab(t); setPage(1) }
   const order = [top[1], top[0], top[2]].filter(Boolean)
 
   return (
@@ -314,19 +289,6 @@ export default function LeaderboardScreen() {
               <em>Top người chơi xuất sắc nhất X-O Arena</em>
             </span>
           </div>
-
-          {/* ===== Toàn cầu / Bạn bè ===== */}
-          <div className="lb-tabs" role="tablist">
-            <button type="button" role="tab" aria-selected={tab === 'global'} className={tab === 'global' ? 'on' : ''} onClick={() => pick('global')}><Globe />Toàn cầu</button>
-            <button type="button" role="tab" aria-selected={tab === 'friends'} className={tab === 'friends' ? 'on' : ''} onClick={() => pick('friends')}><Friends />Bạn bè</button>
-          </div>
-
-          {tab === 'friends' && (
-            <button type="button" className="lb-addfr" onClick={() => user.guest ? setToast('Khách không dùng được tính năng bạn bè') : setFOpen(true)}
-              style={{ left: 640, top: 71, height: 35, padding: '0 12px', zIndex: 6, borderRadius: 12, color: '#fff', fontSize: 11.5, fontWeight: 600, cursor: 'pointer', border: '1px solid rgba(160,205,255,.9)', background: 'linear-gradient(180deg, rgba(60,96,235,.85), rgba(40,40,190,.85))' }}>
-              + Bạn bè{incoming.length > 0 && <b style={{ marginLeft: 6, background: '#ff4f7a', borderRadius: 9, padding: '1px 6px' }}>{incoming.length}</b>}
-            </button>
-          )}
 
           {/* ===== podium ===== */}
           {order.map((p) => <Medal key={p.rank} p={p} rank={p.rank} />)}
@@ -382,33 +344,6 @@ export default function LeaderboardScreen() {
         <TopHud user={user} soon={soon} onProfile={() => nav('/profile')} onSettings={() => nav('/settings')} onLogout={doLogout} />
         <img className="lb-logo" src="/img/join-logo.png" alt="X-O Arena" draggable={false} />
       </div>
-      {fOpen && (
-        <Modal onClose={() => setFOpen(false)}>
-          <div className="panel-title"><XoSvg name="user" /> Bạn bè</div>
-          <form className="row" onSubmit={(e) => { e.preventDefault(); if (fName.trim()) doFriend('add', fName.trim()) }} style={{ marginBottom: 10 }}>
-            <input value={fName} onChange={(e) => setFName(e.target.value)} placeholder="Nhập tên người chơi..." maxLength={24} style={{ flex: 1 }} />
-            <button className="btn sm" type="submit">Kết bạn</button>
-          </form>
-          {incoming.length > 0 && <>
-            <b>Lời mời kết bạn</b>
-            {incoming.map((p) => (
-              <div key={p.key} className="row" style={{ margin: '6px 0', justifyContent: 'space-between' }}>
-                <span>{p.name} · Lv.{p.level}</span>
-                <span><button className="btn sm" onClick={() => doFriend('accept', p.name)}>Chấp nhận</button> <button className="btn sm" onClick={() => doFriend('decline', p.name)}>Từ chối</button></span>
-              </div>
-            ))}
-          </>}
-          <div style={{ margin: '10px 0 4px' }}><b>Danh sách bạn bè ({friends.length})</b></div>
-          {friends.length === 0 && <p className="muted">Chưa có bạn bè. Nhập tên người đã từng đấu online để gửi lời mời.</p>}
-          {friends.map((p) => (
-            <div key={p.name} className="row" style={{ margin: '6px 0', justifyContent: 'space-between' }}>
-              <span>{p.name} · Lv.{p.level} · <XoSvg name="star" /> {vn(p.score)}</span>
-              <button className="btn sm" onClick={() => window.confirm(`Xóa ${p.name} khỏi bạn bè?`) && doFriend('remove', p.name)}>Xóa</button>
-            </div>
-          ))}
-          <button className="btn block" style={{ marginTop: 10 }} onClick={() => setFOpen(false)}>Đóng</button>
-        </Modal>
-      )}
       {toast}
     </div>
   )
