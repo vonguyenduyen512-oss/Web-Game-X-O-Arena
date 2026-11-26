@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { photoOf } from '../lib/avatar.js'
 import { useEffect, useReducer, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -394,13 +395,13 @@ export default function Game() {
       </div>
       <div className="xo-mobile-scoreline">
         <div className="xo-mobile-player">
-          {photo ? <img src={photo} alt="" /> : <span>{user.avatar || 'X'}</span>}
+          {photo ? <img src={photo} alt="" /> : <span><XoAvatar value={user.avatar}/></span>}
           <div><b>{user.name}</b><small>Quân {local ? 'X' : mySym}</small></div>
         </div>
         <div className="xo-mobile-timer"><span>Thời gian</span><b>{mm}</b></div>
         <div className="xo-mobile-player foe">
           <div><b>{opp.name}</b><small>Quân {local ? 'O' : mySym === 'X' ? 'O' : 'X'}</small></div>
-          {oppPhoto ? <img src={oppPhoto} alt="" /> : <span>{opp.avatar || 'O'}</span>}
+          {oppPhoto ? <img src={oppPhoto} alt="" /> : <span><XoAvatar value={opp.avatar}/></span>}
         </div>
       </div>
       <p className="xo-mobile-turn" aria-live="polite">
@@ -482,7 +483,7 @@ export default function Game() {
           <section className="gm-card me">
             <NeonFrame w={166} h={185} c={11} id="gmfl" c1="#5cd0ff" c2="#2f66ff" fill={['rgba(10,22,128,.55)', 'rgba(8,16,104,.78)']} inset={4} sw={2} />
             <div className="gm-av">
-              {photo ? <img src={photo} alt="" draggable={false} /> : <b className="emoji">{user.avatar}</b>}
+              {photo ? <img src={photo} alt="" draggable={false} /> : <b className="emoji"><XoAvatar value={user.avatar}/></b>}
               <span className="ring" />
             </div>
             <div className="gm-info" />
@@ -516,7 +517,7 @@ export default function Game() {
           {/* ===== đối thủ bên phải ===== */}
           <section className="gm-card opp">
             <NeonFrame w={164} h={184} c={11} id="gmfr" c1="#ff63e6" c2="#8a4dff" fill={['rgba(34,12,120,.58)', 'rgba(26,8,96,.78)']} inset={4} sw={2} />
-            <div className="gm-oav">{oppPhoto ? <img src={oppPhoto} alt="" draggable={false} /> : opp.avatar ? <b className="emoji">{opp.avatar}</b> : <Silhouette />}<span className="ring" /></div>
+            <div className="gm-oav">{oppPhoto ? <img src={oppPhoto} alt="" draggable={false} /> : opp.avatar ? <b className="emoji"><XoAvatar value={opp.avatar}/></b> : <Silhouette />}<span className="ring" /></div>
             <div className="gm-info opp" />
             <div className="gm-name"><span>{opp.name}</span></div>
             <div className="gm-lv">{ai ? 'Độ khó: Trung bình' : `Lv.${opp?.level ?? 1}`}</div>

@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { photoOf } from '../lib/avatar.js'
 import { useEffect, useMemo, useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
@@ -148,7 +149,7 @@ function MeAvatar({ user, win }) {
         <g style={{ filter: 'drop-shadow(0 0 4px rgba(255,190,50,.8))' }}><Laurel side="l" /><Laurel side="r" /></g>
       </svg>}
       <div className="rs-av-pic">
-        {photo ? <img src={photo} alt="" draggable={false} /> : <b className="emoji">{user.avatar}</b>}
+        {photo ? <img src={photo} alt="" draggable={false} /> : <b className="emoji"><XoAvatar value={user.avatar}/></b>}
       </div>
       <span className="rs-av-ring" />
       {win && <span className="rs-av-crown"><BigCrown /></span>}
@@ -340,7 +341,7 @@ export default function Result() {
           </div>
 
           <div className="rs-side opp">
-            <div className="rs-av rs-av-opp">{photoOf(opp.avatar) ? <div className="rs-av-pic rs-av-pic-opp"><img src={photoOf(opp.avatar)} alt="" draggable={false} /></div> : opp.avatar ? <div className="rs-av-pic rs-av-pic-opp"><b className="emoji">{opp.avatar}</b></div> : <Silhouette />}<span className="rs-av-ring opp" /></div>
+            <div className="rs-av rs-av-opp">{photoOf(opp.avatar) ? <div className="rs-av-pic rs-av-pic-opp"><img src={photoOf(opp.avatar)} alt="" draggable={false} /></div> : opp.avatar ? <div className="rs-av-pic rs-av-pic-opp"><b className="emoji"><XoAvatar value={opp.avatar}/></b></div> : <Silhouette />}<span className="rs-av-ring opp" /></div>
             <div className="rs-name"><span>{opp.name}</span></div>
             <div className="rs-lv">Lv.{opp.level}</div>
             <PlayerTag kind={oppKind} />

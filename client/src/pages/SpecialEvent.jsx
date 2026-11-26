@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import React, { useState } from 'react';
 import './SpecialEvent.css';
 
@@ -17,7 +18,7 @@ export default function SpecialEvent() {
         <h2>Hiện chưa có sự kiện đặc biệt!</h2>
         <p>Các sự kiện đặc biệt sẽ được mở trong thời gian sắp tới.</p>
         <button type="button" className="xo-special-button" onClick={toggleNotify}>
-          <span aria-hidden="true">♟</span> {notify ? 'Đã bật nhắc sự kiện' : 'Thông báo khi có sự kiện'}
+          <span aria-hidden="true"><XoSvg name="bell" /></span> {notify ? 'Đã bật nhắc sự kiện' : 'Thông báo khi có sự kiện'}
         </button>
       </div>
     </section>

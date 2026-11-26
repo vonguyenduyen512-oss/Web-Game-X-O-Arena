@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useToast } from '../components/Layout.jsx'
@@ -201,7 +202,7 @@ function LeftList({ items, title, icon }) {
     <>
       <div className="ht-h" style={{ left: 17, top: 9 }}>{icon}<b>{title}</b></div>
       <ul className="ht-list">
-        {items.map(([h, p]) => <li key={h}><b>{h}</b><span>{p}</span></li>)}
+        {items.map(([h, p], i) => <li key={i}><b>{h}</b><span>{p}</span></li>)}
       </ul>
     </>
   )
@@ -278,7 +279,7 @@ export default function HowToPlayScreen() {
             {tab === 'rules' && <LeftList title="Luật chơi" icon={<IScales size={24} />}
               items={[['Lượt đi', 'Hai người chơi lần lượt đánh, mỗi lần 1 quân (X hoặc O). X đi trước.'], ['Đặt quân', 'Quân được đặt vào ô trống trên bàn cờ 15x15.'], ['Chiến thắng', 'Ai có 5 quân liên tiếp trước sẽ thắng.'], ['Hòa', 'Nếu bàn cờ đầy mà không có ai thắng, trận đấu sẽ hòa.']]} />}
             {tab === 'modes' && <LeftList title="Các chế độ" icon={<ICube size={24} />} items={MODES} />}
-            {tab === 'tips' && <LeftList title="Mẹo chơi" icon={<IBulb size={24} />} items={TIPS.map((t) => ['✔', t])} />}
+            {tab === 'tips' && <LeftList title="Mẹo chơi" icon={<IBulb size={24} />} items={TIPS.map((t) => [<XoSvg name="check" />, t])} />}
           </Box>
 
           {/* ===== luật chơi ===== */}

@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { photoOf } from '../lib/avatar.js'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -172,7 +173,7 @@ export default function HistoryScreen() {
               <div key={m.id} className={`hs-row ${i === 0 ? 'first' : ''}`} style={{ top: 172 + i * 59.5 }}>
                 <b className="hs-no">#{gi}</b>
                 <div className="hs-opp">
-                  <span className="hs-av">{photoOf(m.opponent.avatar) ? <img src={photoOf(m.opponent.avatar)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <i>{m.opponent.avatar}</i>}</span>
+                  <span className="hs-av">{photoOf(m.opponent.avatar) ? <img src={photoOf(m.opponent.avatar)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <i><XoAvatar value={m.opponent.avatar}/></i>}</span>
                   <div><b>{m.opponent.name}</b><em>Lv.{m.opponent.level}</em></div>
                 </div>
                 <div className={`hs-res ${r.cls}`}>

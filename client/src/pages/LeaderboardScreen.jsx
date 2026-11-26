@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { photoOf } from '../lib/avatar.js'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -191,7 +192,7 @@ function Medal({ p, rank }) {
     <>
       <div className="lb-laurel-wrap" style={{ left: m.x, top: m.y }}><Laurel rank={rank} r={m.r} /></div>
       <div className="lb-medal" style={{ left: m.x - m.r, top: m.y - m.r, width: m.r * 2, height: m.r * 2, background: `linear-gradient(160deg, ${t.ring1}, ${t.ring2})`, boxShadow: `0 0 12px ${t.glow}, 0 0 3px ${t.edge}` }}>
-        <span>{src ? <img src={src} alt="" draggable={false} /> : <i>{p.avatar}</i>}</span>
+        <span>{src ? <img src={src} alt="" draggable={false} /> : <i><XoAvatar value={p.avatar}/></i>}</span>
       </div>
       <div className="lb-crown-wrap" style={{ left: m.x - m.crown[0] / 2, top: m.cy - m.crown[1] / 2 }}><Crown rank={rank} w={m.crown[0]} h={m.crown[1]} /></div>
     </>
@@ -210,7 +211,7 @@ function Tag({ p, rank }) {
 
 const Av = ({ a, big }) => {
   const src = photoOf(a)
-  return <span className={`lb-av ${big ? 'big' : ''}`}>{src ? <img src={src} alt="" draggable={false} /> : <i>{a}</i>}</span>
+  return <span className={`lb-av ${big ? 'big' : ''}`}>{src ? <img src={src} alt="" draggable={false} /> : <i><XoAvatar value={a}/></i>}</span>
 }
 
 const NAV_TOPS = [97, 161, 210, 258, 307, 356]
@@ -383,7 +384,7 @@ export default function LeaderboardScreen() {
       </div>
       {fOpen && (
         <Modal onClose={() => setFOpen(false)}>
-          <div className="panel-title">👥 Bạn bè</div>
+          <div className="panel-title"><XoSvg name="user" /> Bạn bè</div>
           <form className="row" onSubmit={(e) => { e.preventDefault(); if (fName.trim()) doFriend('add', fName.trim()) }} style={{ marginBottom: 10 }}>
             <input value={fName} onChange={(e) => setFName(e.target.value)} placeholder="Nhập tên người chơi..." maxLength={24} style={{ flex: 1 }} />
             <button className="btn sm" type="submit">Kết bạn</button>
@@ -401,7 +402,7 @@ export default function LeaderboardScreen() {
           {friends.length === 0 && <p className="muted">Chưa có bạn bè. Nhập tên người đã từng đấu online để gửi lời mời.</p>}
           {friends.map((p) => (
             <div key={p.name} className="row" style={{ margin: '6px 0', justifyContent: 'space-between' }}>
-              <span>{p.name} · Lv.{p.level} · ⭐ {vn(p.score)}</span>
+              <span>{p.name} · Lv.{p.level} · <XoSvg name="star" /> {vn(p.score)}</span>
               <button className="btn sm" onClick={() => window.confirm(`Xóa ${p.name} khỏi bạn bè?`) && doFriend('remove', p.name)}>Xóa</button>
             </div>
           ))}

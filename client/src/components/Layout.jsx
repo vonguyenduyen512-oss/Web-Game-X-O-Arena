@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from './XoSvg.jsx'
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useApp } from '../store.jsx'
@@ -14,8 +15,8 @@ export function Logo({ size = 'md', sub = true }) {
 export function Mascots() {
   return (
     <div className="mascots">
-      <span className="l">🧑‍🎤</span>
-      <span className="r">👩‍🎤</span>
+      <span className="l"><XoSvg name="user" /></span>
+      <span className="r"><XoSvg name="user" /></span>
     </div>
   )
 }
@@ -28,32 +29,32 @@ export function TopBar() {
   return (
     <header className="topbar">
       <Link to="/profile" className="me">
-        <div className="avatar sm">{user.avatar}</div>
+        <div className="avatar sm"><XoAvatar value={user.avatar} /></div>
         <div>
-          <b>{user.name}</b> 👑
+          <b>{user.name}</b> <XoSvg name="crown" />
           <div className="muted">Lv.{user.level} · {user.exp}/{user.expMax}</div>
           <div className="xp"><i style={{ width: pct + '%' }} /></div>
         </div>
       </Link>
       <div className="currency">
-        <span className="chip">🪙 {user.coins.toLocaleString('vi-VN')}</span>
-        <span className="chip">💎 {user.gems}</span>
+        <span className="chip"><XoSvg name="coins" /> {user.coins.toLocaleString('vi-VN')}</span>
+        <span className="chip"><XoSvg name="gem" /> {user.gems}</span>
       </div>
       <div className="icons">
-        <Link to="/settings" className="icon-btn" title="Cài đặt">⚙</Link>
-        <button className="icon-btn" title="Đăng xuất" onClick={() => { logout(); nav('/login') }}>⏻</button>
+        <Link to="/settings" className="icon-btn" title="Cài đặt"><XoSvg name="settings" /></Link>
+        <button className="icon-btn" title="Đăng xuất" onClick={() => { logout(); nav('/login') }}><XoSvg name="logout" /></button>
       </div>
     </header>
   )
 }
 
 const NAV = [
-  ['/home', '🏠', 'Trang chủ'],
-  ['/profile', '👤', 'Hồ sơ'],
-  ['/history', '🏆', 'Lịch sử đấu'],
-  ['/leaderboard', '📊', 'Bảng xếp hạng'],
-  ['/settings', '⚙️', 'Cài đặt'],
-  ['/how-to-play', '📖', 'Hướng dẫn'],
+  ['/home', <XoSvg name="home" />, 'Trang chủ'],
+  ['/profile', <XoSvg name="user" />, 'Hồ sơ'],
+  ['/history', <XoSvg name="trophy" />, 'Lịch sử đấu'],
+  ['/leaderboard', <XoSvg name="chart" />, 'Bảng xếp hạng'],
+  ['/settings', <XoSvg name="settings" />, 'Cài đặt'],
+  ['/how-to-play', <XoSvg name="book" />, 'Hướng dẫn'],
 ]
 
 export function SideNav({ items = NAV }) {
@@ -126,7 +127,7 @@ export function ChatBox({ messages, onSend, me }) {
   const [text, setText] = useState('')
   return (
     <div className="panel chat">
-      <b>💬 Chat phòng</b>
+      <b><XoSvg name="chat" /> Chat phòng</b>
       <div className="chat-list">
         {messages.map((m, i) => (
           <div key={i}><b>{m.from === me ? m.from : m.from}:</b> {m.text}</div>
@@ -143,8 +144,8 @@ export function ChatBox({ messages, onSend, me }) {
 export function PlayerCard({ name, level, avatar, status, sym, ghost, crown }) {
   return (
     <div className="panel pcard">
-      <div className={`avatar xl ${ghost ? 'ghost' : ''}`}>{ghost ? '?' : avatar}</div>
-      <b>{name} {crown && '👑'}</b>
+      <div className={`avatar xl ${ghost ? 'ghost' : ''}`}>{ghost ? '?' : <XoAvatar value={avatar} />}</div>
+      <b>{name} {crown && <XoSvg name="crown" />}</b>
       {level != null && <span className="muted">Lv.{level}</span>}
       {sym && <span className={`sym ${sym}`}>{sym === 'X' ? '✕' : '◯'}</span>}
       {status && <span className={`tag ${ghost ? 'gray' : 'green'}`}>{status}</span>}

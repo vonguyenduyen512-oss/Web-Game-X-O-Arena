@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../store.jsx'
@@ -67,7 +68,7 @@ export default function Splash({ duration = 3200 }) {
           </div>
           <b className="xs-pct">{pct}%</b>
         </div>
-        <p className="xs-tip">💡 <b>Mẹo nhỏ:</b> {tip}</p>
+        <p className="xs-tip"><XoSvg name="bulb" /> <b>Mẹo nhỏ:</b> {tip}</p>
       </section>
     </main>
   )

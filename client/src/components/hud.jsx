@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from './XoSvg.jsx'
 import { photoOf } from '../lib/avatar.js'
 import { useEffect, useState } from 'react'
 
@@ -78,7 +79,7 @@ export function Avatar({ avatar }) {
   const src = photoOf(avatar)
   return src
     ? <img className="hm-av-img" src={src} alt="" />
-    : <span className="hm-av-emoji">{avatar}</span>
+    : <span className="hm-av-emoji"><XoAvatar value={avatar}/></span>
 }
 
 /* Nền Home: nền + thành phố mờ + bokeh + cánh hoa rơi */

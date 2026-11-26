@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { GALLERY, photoOf } from '../lib/avatar.js'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -240,7 +241,7 @@ export default function ProfileScreen() {
           {/* avatar */}
           <div className="pf-av">
             <span className="pf-av-glow" />
-            <div className="pf-av-pic">{photo ? <img src={photo} alt="" draggable={false} /> : <b className="emoji">{user.avatar}</b>}</div>
+            <div className="pf-av-pic">{photo ? <img src={photo} alt="" draggable={false} /> : <b className="emoji"><XoAvatar value={user.avatar}/></b>}</div>
             <span className="pf-av-ring" />
           </div>
           <span className="pf-crown"><BigCrown /></span>
@@ -319,7 +320,7 @@ export default function ProfileScreen() {
 
       {edit && (
         <Modal onClose={() => setEdit(false)}>
-          <div className="panel-title">✎ Chỉnh sửa hồ sơ</div>
+          <div className="panel-title"><XoSvg name="edit" /> Chỉnh sửa hồ sơ</div>
           <span className="label">Tên hiển thị · Đổi tên mất 500 kim cương</span>
           <div className="field"><input value={name} onChange={(e) => setName(e.target.value)} maxLength={20} /></div>
           <span className="label">Ảnh đại diện · Đổi avatar mất 500 kim cương</span>

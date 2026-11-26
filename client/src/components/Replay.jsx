@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from './XoSvg.jsx'
 import { useMemo, useState } from 'react'
 import { Modal } from './Layout.jsx'
 import { Board } from './Board.jsx'
@@ -9,7 +10,7 @@ export default function Replay({ match, onClose }) {
   const board = useMemo(() => boardFromMoves(match.moves, step), [match, step])
   return (
     <Modal onClose={onClose}>
-      <div className="panel-title">▶ Xem lại trận với {match.opponent.name}</div>
+      <div className="panel-title"><XoSvg name="play" /> Xem lại trận với {match.opponent.name}</div>
       <div className="center" style={{ overflowX: 'auto' }}>
         <div style={{ display: 'inline-block', '--cell': '20px' }}><Board board={board} disabled last={match.moves[step - 1]} /></div>
       </div>

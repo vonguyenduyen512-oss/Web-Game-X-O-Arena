@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { photoOf } from '../lib/avatar.js'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -209,7 +210,7 @@ const Op = () => (
 )
 
 function Av({ avatar, cls }) {
-  return <span className={cls}>{photoOf(avatar) ? <img src={photoOf(avatar)} alt="" draggable="false" /> : <span>{avatar}</span>}</span>
+  return <span className={cls}>{photoOf(avatar) ? <img src={photoOf(avatar)} alt="" draggable="false" /> : <span><XoAvatar value={avatar}/></span>}</span>
 }
 function useFit(w, h) {
   const calc = () => Math.min(window.innerWidth / w, window.innerHeight / h)
@@ -440,7 +441,7 @@ export default function Lobby() {
   </div>
 </div>
           <div style={{ position: 'absolute', left: 92, top: 16, width: 220, textAlign: 'left' }}>
-            <div className="lb-nm">{user.name}<i>♛</i></div>
+            <div className="lb-nm">{user.name}<i><XoSvg name="crown" /></i></div>
             <div style={{ fontSize: 13, fontWeight: 700, marginTop: 4 }}>Lv.{user.level}</div>
             <div style={{ position: 'relative', width: 205, height: 12, marginTop: 4, borderRadius: 8, background: '#19104c', overflow: 'hidden' }}>
               <div style={{ width: pct + '%', height: '100%', background: 'linear-gradient(90deg,#55aaff,#80e4ff)' }} />
@@ -472,7 +473,7 @@ export default function Lobby() {
         <div className="lb-a lb-pc me">
           <Crown />
           <Av cls="lb-pav" avatar={user.avatar} />
-          <div className="lb-pn">{user.name}<i>♛</i></div>
+          <div className="lb-pn">{user.name}<i><XoSvg name="crown" /></i></div>
           <div className="lb-pl">Lv.{user.level}</div>
           <div className="lb-ready">
             <button className={'lb-rb' + (ready ? '' : ' off')} onClick={() => setReady((r) => !r)}><i />{ready ? 'Sẵn sàng' : 'Chưa sẵn sàng'}</button>
@@ -507,7 +508,7 @@ export default function Lobby() {
             ))}
           </div>
           <form className="lb-in" onSubmit={send}>
-            <button type="button" className="lb-em" onClick={() => setText((v) => v + '😊')} aria-label="Biểu tượng cảm xúc">😊</button>
+            <button type="button" className="lb-em" onClick={() => setText((v) => v + '😊')} aria-label="Biểu tượng cảm xúc"><XoSvg name="smile" /></button>
             <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Nhập tin nhắn..." maxLength={120} />
             <button className="lb-send" type="submit" aria-label="Gửi"><Plane /></button>
           </form>

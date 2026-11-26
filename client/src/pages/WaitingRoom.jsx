@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { photoOf } from '../lib/avatar.js'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
@@ -308,7 +309,7 @@ function MePanel({ user }) {
       <NeonFrame w={CARD_W} h={CARD_H} id="wrfl" c1="#5cd0ff" c2="#2f66ff" fill={['rgba(10,22,128,.50)', 'rgba(8,16,104,.72)']} />
       <div className="wr-avatar">
         <span className="wr-ring" />
-        {photo ? <img src={photo} alt="" draggable={false} /> : <b className="emoji">{user.avatar}</b>}
+        {photo ? <img src={photo} alt="" draggable={false} /> : <b className="emoji"><XoAvatar value={user.avatar}/></b>}
       </div>
       <div className="wr-info" />
       <span className="wr-bigcrown"><BigCrown /></span>
@@ -345,7 +346,7 @@ function OpponentPanel({ joined, info }) {
       <NeonFrame w={CARD_W} h={CARD_H} id="wrfr" c1="#ff63e6" c2="#8a4dff" fill={['rgba(34,12,120,.55)', 'rgba(26,8,96,.74)']} />
       <div className="wr-oavatar">
         <span className="wr-oring" />
-        {joined ? (photoOf(info?.avatar) ? <img src={photoOf(info.avatar)} alt="" draggable={false} /> : <b className="emoji">{info?.avatar || '🧑'}</b>) : <Silhouette />}
+        {joined ? (photoOf(info?.avatar) ? <img src={photoOf(info.avatar)} alt="" draggable={false} /> : <b className="emoji"><XoAvatar value={info?.avatar}/></b>) : <Silhouette />}
       </div>
       <div className="wr-info opp" />
       {joined ? (

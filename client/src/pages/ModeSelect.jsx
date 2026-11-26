@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { photoOf } from '../lib/avatar.js'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -197,7 +198,7 @@ const Pagoda = ({ className }) => (
 )
 
 function Avatar({ avatar }) {
-  return photoOf(avatar) ? <img src={photoOf(avatar)} alt="" draggable="false" /> : <span>{avatar}</span>
+  return photoOf(avatar) ? <img src={photoOf(avatar)} alt="" draggable="false" /> : <span><XoAvatar value={avatar}/></span>
 }
 
 function useFit(w, h) {
@@ -250,7 +251,7 @@ export default function ModeSelect() {
         <button className="ms-abs ms-me" onClick={() => nav('/profile')} aria-label="Hồ sơ">
           <span className="ms-av"><Avatar avatar={user.avatar} /></span>
           <span className="ms-me-i">
-            <div className="ms-nm">{user.name}<i>♛</i></div>
+            <div className="ms-nm">{user.name}<i><XoSvg name="crown" /></i></div>
             <div className="ms-lv"><b>Lv.{user.level}</b><div className="ms-xp"><i style={{ width: pct + '%' }} /><span>{fmt(user.exp)} / {fmt(user.expMax)}</span></div></div>
           </span>
         </button>

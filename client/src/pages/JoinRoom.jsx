@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useToast } from '../components/Layout.jsx'
@@ -212,7 +213,7 @@ export default function JoinRoom() {
                 <button type="button" key={r.code} className={`jr-row ${code === r.code ? 'sel' : ''}`} style={{ top: i * 26.1 }}
                   onClick={() => { setCode(r.code); if (r.hasPw) setTimeout(() => pwRef.current?.focus(), 0) }}>
                   <span className="c0"><u>{r.code}</u></span>
-                  <span className="c1">{r.hasPw && <i className="jr-lk" aria-label="Có mật khẩu">🔒</i>}<s>{r.name}</s></span>
+                  <span className="c1">{r.hasPw && <i className="jr-lk" aria-label="Có mật khẩu"><XoSvg name="lock" /></i>}<s>{r.name}</s></span>
                   <span className="c2"><Swords />{r.mode}</span>
                   <span className="c3">{r.players}/2</span>
                   <span className="c4"><em className={r.playing ? 'play' : 'wait'}>{r.playing ? 'Đang chơi' : 'Đang chờ'}</em></span>

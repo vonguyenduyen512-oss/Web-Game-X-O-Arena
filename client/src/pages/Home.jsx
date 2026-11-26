@@ -1,3 +1,4 @@
+import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { photoOf } from '../lib/avatar.js'
 import { useCallback, useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
@@ -119,7 +120,7 @@ function Avatar({ avatar }) {
   const src = photoOf(avatar)
   return src
     ? <img className="hm-av-img" src={src} alt="" />
-    : <span className="hm-av-emoji">{avatar}</span>
+    : <span className="hm-av-emoji"><XoAvatar value={avatar}/></span>
 }
 
 export default function Home() {
