@@ -166,3 +166,117 @@
 .wr-card.opp.joined .wr-oavatar .emoji {
     font-size: 96px;
 }
+
+/* XO-WAITING-AVATAR-FINAL-EQUAL */
+
+/* Hai vong avatar cung 148x148, can giua the 209px */
+.wr-card.me .wr-avatar,
+.wr-card.opp .wr-oavatar {
+    position: absolute;
+    left: 30.5px;
+    top: 12px;
+    width: 148px;
+    height: 148px;
+    min-width: 148px;
+    min-height: 148px;
+    max-width: 148px;
+    max-height: 148px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-sizing: border-box;
+    background: radial-gradient(circle, #521cb1, #1b0859);
+}
+
+/* Vong vien tron: cung kich thuoc */
+.wr-card.me .wr-avatar .wr-ring,
+.wr-card.opp .wr-oavatar .wr-oring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    box-sizing: border-box;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Giu mau vien rieng tung ben */
+.wr-card.me .wr-avatar .wr-ring {
+    border: 3px solid #64bfff;
+}
+
+.wr-card.opp .wr-oavatar .wr-oring {
+    border: 3px solid #d38cff;
+}
+
+/* Anh dai dien */
+.wr-card.me .wr-avatar img,
+.wr-card.opp .wr-oavatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* SVG doi thu luon nam trong khung tron */
+.wr-card.opp .wr-oavatar > svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    transform: scale(1.085);
+    transform-origin: center;
+}
+
+/* Can giua icon mac dinh */
+.wr-card.me .wr-avatar .emoji,
+.wr-card.opp .wr-oavatar .emoji {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Icon nguoi choi khong bi phong qua lon */
+.wr-card.me .wr-avatar .emoji > svg,
+.wr-card.opp .wr-oavatar .emoji > svg {
+    width: 78px;
+    height: 78px;
+    max-width: 78px;
+    max-height: 78px;
+}
+
+/* Hai khu vuc thong tin bat dau cung do cao */
+.wr-card.me .wr-info,
+.wr-card.opp .wr-info.opp {
+    top: 163px;
+    height: 79px;
+}
+
+/* Thong tin doi thu khi da vao phong */
+.wr-card.opp.joined .wr-name {
+    top: 168px;
+}
+
+.wr-card.opp.joined .wr-lv {
+    top: 190px;
+}
+
+.wr-card.opp.joined .wr-ready-pos {
+    top: 209px;
+}
+
+/* Thong tin khi dang cho */
+.wr-card.opp .wr-wait {
+    top: 174px;
+}
+
+.wr-card.opp .wr-spin {
+    top: 212px;
+}
