@@ -1,4 +1,4 @@
-
+﻿
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
@@ -18,6 +18,7 @@ for (const name of [
   'register-otp.js',
   'forgot-password-otp.js',
   'index.js',
+  'supabase-store.js',
   'users.json',
   'main-account.json',
   'leaderboard.json',
@@ -134,6 +135,7 @@ const child = spawn(
     cwd: path.join(tmp, 'server'),
     env: {
       ...process.env,
+      DATABASE_URL: '',
       PORT: String(port),
       JWT_SECRET: 'integration-test-secret-32-characters-minimum',
       ADMIN_USERNAME: 'admin',
@@ -395,10 +397,9 @@ try {
   // Doi mat khau
   const change = await post('/api/main/change-password', {
     currentPassword: pw1,
-    newPassword: 'a-new-strong-test-password-123'
+    newPassword: 'A-new-strong-test-password-123'
   }, t1)
-
-  assert.equal(change.status, 200)
+assert.equal(change.status, 200)
 
   assert.equal(
     (await post('/api/main/load', {}, t1)).status,
@@ -436,3 +437,7 @@ try {
     force: true
   })
 }
+
+
+
+
