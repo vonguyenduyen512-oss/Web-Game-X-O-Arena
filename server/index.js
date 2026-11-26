@@ -16,7 +16,7 @@ import { Server } from 'socket.io'
 import { SIZE, TURN_TIME, checkWin, createBoard } from '../client/src/lib/game.js'
 import fs from 'node:fs'
 import { persistGameData } from './supabase-store.js'
-import { randomUUID, randomBytes } from 'node:crypto'
+import { randomUUID, randomBytes, createHash } from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { OAuth2Client } from 'google-auth-library'
@@ -54,7 +54,7 @@ const xoXp = (u,result) => {
   }
   Object.assign(u,{level,exp,expMax})
 }
-const safe = ({ hash, ...u }) => ({
+const safe = ({ hash, guestResumeHash, ...u }) => ({
       ...u,
       level: Math.max(1,Number(u.level)||1),
       exp: Number(u.exp)||0,
@@ -490,7 +490,7 @@ async function api(req, res) {
     const old = entry.user
       // XO_ARENA_NGUYEN_DUYEN_1000_ONCE
       if (k === 'nguyen duyen' && !old.duyen1000Granted) {
-        old.gems = 1000
+        old.gems = Math.max(1000, Number(old.gems) || 0)
         old.duyen1000Granted = true
         old.updatedAt = Date.now()
         old.rev = (old.rev || 0) + 1
@@ -781,6 +781,8 @@ const account = users.find(
           exp: 0,
           coins: 500,
             gems: 1000,
+          googleWelcome1000: true,
+          welcome1000Granted: true,
           score: 0,
           createdAt: Date.now()
         }
@@ -793,7 +795,7 @@ const account = users.find(
         return send(res, 403, { error: 'Tài khoản đã bị khóa.' })
       }
         // Thuong khoi tao Google: chi cap mot lan
-        if (!u.googleWelcome1000) {
+        if (!u.googleWelcome1000 && !u.welcome1000Granted) {
           u.coins = Math.max(500, Number(u.coins) || 0)
           u.gems = Math.max(1000, Number(u.gems) || 0)
           u.googleWelcome1000 = true
@@ -811,6 +813,31 @@ const account = users.find(
     }
   }
 
+  // Anonymous accounts use the same authenticated player APIs as registered users.
+  if (req.method === 'POST' && url === '/api/auth/guest') {
+    const body = await readBody(req)
+    const credential = body?.credential
+    if (typeof credential !== 'string' || !/^[a-f0-9]{64}$/.test(credential)) {
+      return send(res, 400, { error: 'Thông tin đăng nhập khách không hợp lệ.' })
+    }
+    const digest = createHash('sha256').update(credential).digest('hex')
+    let u = users.find(x => x.provider === 'guest' && x.guestResumeHash === digest)
+    if (!u) {
+      if (body.resumeOnly) return send(res, 401, { error: 'Không tìm thấy tài khoản khách đã lưu.' })
+      let name
+      do { name = 'Khach' + randomBytes(5).toString('hex') }
+      while (users.some(x => lbKey(x.name) === lbKey(name)) || mainData[lbKey(name)] || lb[lbKey(name)])
+      u = { id: randomUUID(), provider: 'guest', guestResumeHash: digest,
+        name, email: '', birthday: '', avatar: 'duo', guest: false, level: 1,
+        exp: 0, coins: 500, gems: 1000, welcome1000Granted: true,
+        score: 0, matches: [], createdAt: Date.now() }
+      users.push(u)
+      saveUsers()
+    }
+    if (u.locked) return send(res, 403, { error: 'Tài khoản đã bị khóa.' })
+    return send(res, 200, { token: sign(u), user: safe(u), matches: u.matches || [] })
+  }
+
   // Đăng nhập bằng email và mật khẩu
   if (req.method === 'POST' && url === '/api/login') {
     const { id, password } = await readBody(req)
@@ -823,7 +850,7 @@ const account = users.find(
     }
 
     // XO_EMAIL_WELCOME_1000_V1
-    if (!u.welcome1000Granted) {
+    if (!u.welcome1000Granted && !u.googleWelcome1000) {
       u.gems = Math.max(1000, Number(u.gems) || 0)
       u.welcome1000Granted = true
       saveUsers()

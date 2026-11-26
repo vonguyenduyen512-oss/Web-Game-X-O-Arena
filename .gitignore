@@ -1,4 +1,4 @@
-﻿node_modules/
+node_modules/
 dist/
 .env
 .env.*
@@ -69,3 +69,10 @@ dist/
 *.log
 
 /backup-before-security/
+
+# Private runtime data and temporary files
+server/features.json
+server/main-auth*.json
+server/*.json.*.tmp
+server/*.json.tmp
+*.bak-*

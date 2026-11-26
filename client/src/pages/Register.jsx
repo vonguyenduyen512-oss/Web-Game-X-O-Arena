@@ -271,10 +271,15 @@ export default function Register() {
           type="button"
           className="xa-btn alt"
           disabled={googleBusy}
-          onClick={() => {
-            guestLogin()
-            nav('/home', { replace: true })
-          }}
+          onClick={async () => {
+              setGoogleBusy(true)
+              setGoogleError('')
+              try {
+                const error = await guestLogin()
+                if (error) return setGoogleError(error)
+                nav('/home', { replace: true })
+              } finally { setGoogleBusy(false) }
+            }}
         >
           <Svg d={PATH.pad} />
           Chơi với tài khoản khách

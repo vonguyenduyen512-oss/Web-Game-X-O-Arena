@@ -333,26 +333,35 @@ useEffect(() => {
     }
   }
 
-  const guestLogin = () => {
-    localStorage.removeItem('xo_player_token')
-
-    const savedGuest = load('xo_guest_profile_v1', null)
-    const validGuest = savedGuest?.user?.guest === true
-
-    const guest = validGuest
-      ? savedGuest.user
-      : {
-          ...newUser({
-            name: 'Khach' + Math.floor(Math.random() * 9000 + 1000),
-            guest: true
-          }),
-          coins: 500,
-          gems: 1000
-        }
-
-    setUser(guest)
-    setMatches(validGuest ? (savedGuest.matches || []) : [])
+  const guestBusy = useRef(false)
+  const guestLogin = async (resumeOnly = false) => {
+    if (guestBusy.current) return 'Đang đăng nhập.'
+    guestBusy.current = true
+    try {
+      let credential = localStorage.getItem('xo_guest_credential_v2')
+      if (!credential) {
+        if (resumeOnly) return 'Không tìm thấy tài khoản khách đã lưu.'
+        credential = Array.from(crypto.getRandomValues(new Uint8Array(32)), n => n.toString(16).padStart(2, '0')).join('')
+        localStorage.setItem('xo_guest_credential_v2', credential)
+      }
+      const res = await fetch('/api/auth/guest', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential, resumeOnly })
+      })
+      const data = await res.json()
+      if (!res.ok || !data.token || !data.user) return data.error || 'Đăng nhập khách thất bại.'
+      localStorage.setItem('xo_player_token', data.token)
+      setUser(fixExp({ ...data.user, main: false, guest: false }))
+      setMatches(mergeHistory(data.matches || [], load(offlineKey(data.user), [])))
+      return null
+    } catch { return 'Không kết nối được Backend.' }
+    finally { guestBusy.current = false }
   }
+  useEffect(() => {
+    if (user?.provider === 'guest') guestLogin(true).catch(() => {})
+    // Legacy local-only guests must explicitly sign in again.
+    if (user?.guest) { localStorage.removeItem('xo_player_token'); setUser(null); setMatches([]) }
+  }, [])
   // Đăng xuất: dữ liệu tài khoản chính đã nằm trong xo_main nên không mất
   const logout = () => { localStorage.removeItem('xo_player_token'); setUser(null); setMatches([]) }
 

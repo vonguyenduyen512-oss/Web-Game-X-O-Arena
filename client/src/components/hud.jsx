@@ -127,7 +127,7 @@ export function TopHud({ user, onProfile, onSettings, onLogout, soon }) {
 
       <div className="hm-icons">
         <button className="hm-round" onClick={onSettings} aria-label="Cài đặt"><Ico n="gear" size={24} /></button>
-        <button className="hm-round" onClick={onLogout} aria-label="Đăng xuất"><Ico n="power" size={24} /></button>
+        {onLogout && <button className="hm-round" onClick={onLogout} aria-label="Đăng xuất"><Ico n="power" size={24} /></button>}
       </div>
     </>
   )

@@ -189,7 +189,7 @@ transform: `translate(-50%, -50%) scale(${scale})`
           soon={soon}
           onProfile={() => nav('/profile')}
           onSettings={() => {}}
-          onLogout={doLogout}
+          
         />
 
         <img

@@ -157,9 +157,14 @@ export default function Login() {
             className="xa-btn alt"
             style={{ width: '100%', minHeight: 46 }}
             disabled={googleBusy}
-            onClick={() => {
-              guestLogin()
-              nav('/home', { replace: true })
+            onClick={async () => {
+              setGoogleBusy(true)
+              setError('')
+              try {
+                const error = await guestLogin()
+                if (error) return setError(error)
+                nav('/home', { replace: true })
+              } finally { setGoogleBusy(false) }
             }}
           >
             <Svg d={PATH.pad} />

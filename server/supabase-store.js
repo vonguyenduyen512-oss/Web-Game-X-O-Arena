@@ -2,6 +2,8 @@ import { fileURLToPath } from 'node:url'
 
 import fs from 'node:fs'
 import path from 'node:path'
+import { randomUUID } from 'node:crypto'
+import { setTimeout as delay } from 'node:timers/promises'
 import pg from 'pg'
 
 const FILES = [
@@ -24,6 +26,25 @@ const pool = process.env.DATABASE_URL
   : null
 
 const queues = new Map()
+const expected = new Map()
+// Replace a cache file only after the complete JSON has been written.
+async function writeCache(destination, data) {
+  const tmp = destination + '.' + randomUUID() + '.tmp'
+  try {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        fs.writeFileSync(tmp, JSON.stringify(data, null, 2), { mode: 0o600 })
+        fs.renameSync(tmp, destination)
+        return
+      } catch (error) {
+        if (attempt >= 4 || !['UNKNOWN', 'EPERM', 'EBUSY', 'EACCES'].includes(error.code)) throw error
+        await delay(150 * (attempt + 1))
+      }
+    }
+  } finally {
+    try { fs.unlinkSync(tmp) } catch (error) { if (error.code !== 'ENOENT') console.error('[database] Cache cleanup failed:', error.code) }
+  }
+}
 let databaseReady = false
 
 export async function initializeGameData() {
@@ -58,10 +79,8 @@ export async function initializeGameData() {
     )
 
     // File local chi la ban sao tam thoi
-    fs.writeFileSync(
-      destination,
-      JSON.stringify(records.get(file), null, 2)
-    )
+    await writeCache(destination, records.get(file))
+    expected.set(file, JSON.stringify(records.get(file)))
   }
 
   databaseReady = true
@@ -81,23 +100,23 @@ export function persistGameData(file, data) {
   const snapshot = JSON.stringify(data)
   const previous = queues.get(name) || Promise.resolve()
 
-  const next = previous
-    .catch(() => {})
-    .then(() => pool.query(
-      `INSERT INTO public.game_data
-         (data_key, data_value, updated_at)
-       VALUES ($1, $2::jsonb, NOW())
-       ON CONFLICT (data_key)
-       DO UPDATE SET
-         data_value = EXCLUDED.data_value,
-         updated_at = NOW()`,
-      [name, snapshot]
-    ))
+  const next = previous.then(async () => {
+    const old = expected.get(name)
+    const result = old === undefined
+      ? await pool.query(`INSERT INTO public.game_data (data_key, data_value, updated_at)
+          VALUES ($1, $2::jsonb, NOW()) ON CONFLICT (data_key) DO NOTHING`, [name, snapshot])
+      : await pool.query(`UPDATE public.game_data SET data_value = $2::jsonb, updated_at = NOW()
+          WHERE data_key = $1 AND data_value = $3::jsonb`, [name, snapshot, old])
+    if (result.rowCount !== 1) throw new Error('Concurrent database change; refusing stale overwrite')
+    expected.set(name, snapshot)
+  })
 
   queues.set(name, next)
 
   next.catch(error => {
     console.error('[database] SAVE FAILED:', name, error.message)
+    // Fail closed: do not continue serving from a stale snapshot.
+    process.exit(1)
   })
 }
 

@@ -1,50 +1,46 @@
 # X-O Arena
 
-X-O Arena là website game Caro được xây dựng bằng React, Vite, Node.js và Socket.IO. Game sử dụng bàn cờ 15×15, hỗ trợ chơi với máy, chơi hai người trên cùng thiết bị và chơi trực tuyến.
+X-O Arena là game Caro trên nền tảng web, sử dụng bàn cờ 15×15. Game hỗ trợ chơi với máy, chơi hai người trên cùng thiết bị và chơi online.
 
-Ngoài ra, game có các chức năng quản lý tài khoản, lịch sử trận đấu, bảng xếp hạng, nhiệm vụ, điểm danh và nhận thưởng.
+## 1. Công nghệ sử dụng
+
+- Frontend: React, Vite, CSS.
+- Backend: Node.js, Express.
+- Kết nối thời gian thực: Socket.IO.
+- Lưu trữ dữ liệu: Supabase.
+- Triển khai Frontend: Vercel.
+
+## 2. Chức năng
+
+- Đăng ký, đăng nhập bằng tài khoản, Google hoặc đăng nhập nhanh.
+- Xác thực email và khôi phục mật khẩu bằng OTP.
+- Chơi với máy, chơi hai người và chơi online.
+- Tạo phòng, tham gia phòng, ghép trận nhanh.
+- Chat, đầu hàng, đề nghị hòa và chơi lại.
+- Hồ sơ cá nhân, lịch sử đấu và bảng xếp hạng.
+- Nhiệm vụ, sự kiện, điểm danh và nhận thưởng.
+- Hệ thống vàng, kim cương, EXP và cấp độ.
+
+Tài khoản mới được cấp 500 vàng và 1.000 kim cương khi khởi tạo.
 
 Chế độ Giải đấu dự kiến ra mắt năm 2027.
 
-## 1. Yêu cầu
+## 3. Cài đặt
 
-- Node.js 20 trở lên.
-- Trình duyệt web như Chrome hoặc Edge.
-- Kết nối Internet khi sử dụng OTP qua Gmail hoặc đăng nhập Google.
+Yêu cầu Node.js phiên bản 20 trở lên.
 
-## 2. Cài đặt
-
-Mở thư mục dự án bằng Visual Studio Code, sau đó mở Terminal tại thư mục gốc `xo-arena-github`.
-
-Cài đặt thư viện Backend:
+Mở thư mục dự án bằng Visual Studio Code và chạy các lệnh sau:
 
 ```powershell
 npm --prefix server install
-```
-
-Cài đặt thư viện Frontend:
-
-```powershell
 npm --prefix client install
 ```
 
-Chỉ cần cài đặt thư viện lần đầu hoặc khi thay đổi các gói phụ thuộc.
+Cấu hình file `server/.env` và `client/.env` để sử dụng Supabase, Gmail OTP và Google Login.
 
-## 3. Cấu hình
+## 4. Chạy game
 
-Backend sử dụng file `server/.env` để lưu các thông số cấu hình.
-
-Khi chạy bằng `npm --prefix server run dev`, chương trình có thể tự tạo file `.env` với `JWT_SECRET` ngẫu nhiên nếu file chưa tồn tại.
-
-Để sử dụng chức năng gửi OTP qua Gmail, cần cấu hình các thông số SMTP phù hợp với tài khoản gửi email.
-
-Để sử dụng Google Login, cấu hình `GOOGLE_CLIENT_ID` ở Backend và `VITE_GOOGLE_CLIENT_ID` trong `client/.env`. Hai giá trị này phải sử dụng cùng Google Client ID.
-
-Không chia sẻ file `.env` hoặc thông tin đăng nhập cá nhân.
-
-## 4. Chạy dự án
-
-Mở hai Terminal riêng biệt trong VS Code.
+Mở hai Terminal trong Visual Studio Code.
 
 **Terminal 1 – Backend**
 
@@ -52,13 +48,7 @@ Mở hai Terminal riêng biệt trong VS Code.
 npm --prefix server run dev
 ```
 
-Khi chạy thành công, Backend hiển thị:
-
-```text
-X-O Arena server chạy ở cổng 3001
-```
-
-Giữ Terminal này hoạt động.
+Backend chạy tại cổng 3001.
 
 **Terminal 2 – Frontend**
 
@@ -66,64 +56,40 @@ Giữ Terminal này hoạt động.
 npm --prefix client run dev
 ```
 
-Khi chạy thành công, Vite hiển thị địa chỉ truy cập:
+Truy cập: http://127.0.0.1:5173/
 
-```text
-http://localhost:5173/
-```
+Giữ cả hai Terminal hoạt động trong quá trình chơi game. Nhấn `Ctrl + C` để dừng chương trình.
 
-Mở trình duyệt và truy cập:
+## 5. Kiểm tra
 
-http://localhost:5173/
-
-Để dừng chương trình, nhấn `Ctrl + C` trong từng Terminal.
-
-## 5. Chức năng chính
-
-- Đăng ký, đăng nhập và quản lý tài khoản.
-- Xác minh email bằng OTP và khôi phục mật khẩu.
-- Hỗ trợ đăng nhập bằng Google khi đã cấu hình.
-- Chơi Caro trên bàn cờ 15×15.
-- Chơi với máy, chơi hai người và chơi trực tuyến.
-- Tạo phòng, tham gia phòng và ghép trận nhanh.
-- Đồng bộ nước đi giữa hai người chơi bằng Socket.IO.
-- Hiển thị kết quả và lưu lịch sử trận đấu.
-- Bảng xếp hạng người chơi.
-- Nhiệm vụ, điểm danh và nhận thưởng.
-- Hồ sơ người chơi và cài đặt tài khoản.
-- Chat, đề nghị hòa, đầu hàng và yêu cầu chơi lại trong trận trực tuyến.
-
-## 6. Kiểm tra dự án
-
-Mở Terminal tại thư mục gốc dự án.
-
-**Kiểm thử tích hợp:**
-
-```powershell
-node test-integration.mjs
-```
-
-**Kiểm tra build Frontend:**
+Kiểm tra Frontend:
 
 ```powershell
 npm --prefix client run build
 ```
 
-**Kiểm tra cú pháp Backend:**
+Kiểm tra cú pháp Backend:
 
 ```powershell
 node --check server/index.js
 node --check server/start.js
-node --check server/register-otp.js
+node --check server/supabase-store.js
 ```
 
-Các bước kiểm tra giúp phát hiện lỗi cú pháp, lỗi build và một số lỗi trong quá trình xử lý tài khoản, phần thưởng và trận đấu trực tuyến.
+Kiểm thử tích hợp:
 
-## 7. Lưu ý
+```powershell
+node test-integration.mjs
+```
 
-- Giữ nguyên cấu trúc hai thư mục `client` và `server`.
-- Không xóa các file JSON chứa dữ liệu tài khoản và lịch sử trận đấu.
-- Nếu gặp lỗi `EADDRINUSE 3001`, kiểm tra xem Backend đã chạy ở Terminal khác chưa.
-- Không cần chạy `npm install` mỗi lần mở game.
-- Không đưa file `.env`, mật khẩu hoặc dữ liệu tài khoản thật lên GitHub.
-- Chế độ Giải đấu hiện chỉ ở trạng thái sắp ra mắt, chưa phải chức năng thi đấu hoàn chỉnh.
+Khi kiểm tra chế độ online, sử dụng hai tài khoản khác nhau trên trình duyệt thường và trình duyệt ẩn danh.
+
+## 6. Lưu ý
+
+- Chỉ cần cài đặt thư viện khi chạy dự án lần đầu hoặc thay đổi thư viện.
+- Không đưa file `.env` và dữ liệu tài khoản lên GitHub.
+- Nếu cổng 3001 đang được sử dụng, kiểm tra Backend có đang chạy ở Terminal khác không.
+
+## 7. Website
+
+https://web-game-x-o-arena.vercel.app/
