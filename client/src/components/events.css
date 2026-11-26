@@ -249,3 +249,21 @@
 .ev-main > .ew-content { z-index: 1 !important; }
 .ev-main > .ev-other-panel { z-index: 1 !important; }
 .ew-summary { display: none !important; }
+
+/* FIX: Nut Diem danh nam gon trong khung */
+.ev-stage .ev-row .ev-claim {
+    left: 276px !important;
+    top: 6px !important;
+    width: 78px !important;
+    height: 25px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 3px !important;
+    font-size: 9.5px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    overflow: visible;
+}
