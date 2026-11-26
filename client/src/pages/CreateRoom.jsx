@@ -1,3 +1,4 @@
+import "../components/balanced-stage.css"
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useToast } from '../components/Layout.jsx'
@@ -156,6 +157,8 @@ export default function CreateRoom() {
   return (
     <div className="hm-root">
       <div className="hm-stage cr-stage" style={{ width: Math.max(1280, window.innerWidth / Math.max(scale, 0.001)),
+          '--xo-gap': `${Math.max(0, window.innerWidth / Math.max(scale, 0.001) - 1280)}px`,
+          '--xo-inner-half': `${Math.max(0, window.innerWidth / Math.max(scale, 0.001) - 1280) / 2}px`,
 transform: `translate(-50%, -50%) scale(${scale})` }}>
         {/* ===== nền + nhân vật ===== */}
         <HomeBackdrop />

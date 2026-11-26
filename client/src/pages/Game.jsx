@@ -1,3 +1,4 @@
+import "../components/balanced-stage.css"
 import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { photoOf } from '../lib/avatar.js'
 import { useEffect, useReducer, useRef, useState } from 'react'
@@ -449,6 +450,8 @@ export default function Game() {
   return (
     <div className="hm-root">
       <div className="hm-stage jr-stage wr-stage gm-stage" style={{ width: Math.max(1280, window.innerWidth / Math.max(scale, 0.001)),
+          '--xo-gap': `${Math.max(0, window.innerWidth / Math.max(scale, 0.001) - 1280)}px`,
+          '--xo-inner-half': `${Math.max(0, window.innerWidth / Math.max(scale, 0.001) - 1280) / 2.6472}px`,
 transform: `translate(-50%, -50%) scale(${scale})` }}>
         <div className="wr-bg"><Backdrop /></div>
 

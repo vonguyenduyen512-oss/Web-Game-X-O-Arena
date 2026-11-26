@@ -1,0 +1,24 @@
+/* Keep the full-width backdrop; redistribute fixed-coordinate foregrounds without stretching. */
+@media (orientation: landscape) {
+.pf-stage .wr-s > :not(.pf-nav),
+.sx-stage .sx-s > :not(.sx-nav),
+.hs-stage .hs-s > :not(.hs-nav),
+.hm-stage.lb-stage .lb-s > :not(.lb-nav),
+.ev-stage .ev-s > :not(.ev-nav),
+.jr-stage .jr-s > *,
+.wr-stage:not(.pf-stage) .wr-s > *,
+.gm-stage .gm-s > * { translate: var(--xo-inner-half, 0px) 0; }
+.ms-stage > :is(.ms-cardw,.ms-tile,.ms-slogan) { translate: var(--xo-inner-half, 0px) 0; }
+.ms-stage > .ms-ibtn, .lb-stage:not(.hm-stage) > :is(.lb-chat,.lb-ibtn) { translate: var(--xo-gap, 0px) 0; }
+.lb-stage:not(.hm-stage) > :is(.lb-roomw,.lb-pc,.lb-vs,.lb-btn,.lb-logo,.lb-char,svg.lb-a) { translate: var(--xo-inner-half, 0px) 0; }
+.lb-stage:not(.hm-stage) > .lb-bar:last-of-type { translate: var(--xo-gap, 0px) 0; }
+.cr-stage > :is(.cr-panel,.cr-create-wrap,.cr-girl,.cr-banner,.cr-swirl,.cr-xblock) { translate: var(--xo-inner-half, 0px) 0; }
+.cr-stage > :is(.cr-preview,.cr-logo,.cr-net) { translate: var(--xo-gap, 0px) 0; }
+}
+.pf-stage .pf-id { width: 265px; max-width: 265px; gap: 5px; }
+.pf-stage .pf-id > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pf-stage .pf-id > button { flex: none; }
+.lb-stage .lb-pav { box-sizing: border-box; flex-shrink: 0; aspect-ratio: 1; }
+.lb-stage .lb-profile-avatar > span, .lb-stage .lb-pav > span { display: grid; place-items: center; }
+.lb-stage .lb-profile-avatar svg, .lb-stage .lb-pav > span > svg { position: static; width: 65%; height: 65%; max-width: 100%; max-height: 100%; }
+.lb-stage .lb-ch { min-height: 46px; height: auto; flex-shrink: 0; line-height: 1.25; }

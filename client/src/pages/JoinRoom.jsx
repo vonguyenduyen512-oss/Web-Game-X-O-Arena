@@ -1,3 +1,4 @@
+import "../components/balanced-stage.css"
 import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -143,6 +144,8 @@ export default function JoinRoom() {
   return (
     <div className="hm-root">
       <div className="hm-stage jr-stage" style={{ width: Math.max(1280, window.innerWidth / Math.max(scale, 0.001)),
+          '--xo-gap': `${Math.max(0, window.innerWidth / Math.max(scale, 0.001) - 1280)}px`,
+          '--xo-inner-half': `${Math.max(0, window.innerWidth / Math.max(scale, 0.001) - 1280) / 2.6834}px`,
 transform: `translate(-50%, -50%) scale(${scale})` }}>
         <div className="jr-bg" />
         {PETALS.slice(0, 10).map((p, i) => (

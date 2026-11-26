@@ -1,3 +1,4 @@
+import "../components/balanced-stage.css"
 import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { photoOf } from '../lib/avatar.js'
 import { useEffect, useState } from 'react'
@@ -242,6 +243,8 @@ export default function ModeSelect() {
     <div className="ms-root">
       <style>{CSS}</style>
       <div className="ms-stage" style={{ width: Math.max(1280, window.innerWidth / Math.max(scale, 0.001)),
+          '--xo-gap': `${Math.max(0, window.innerWidth / Math.max(scale, 0.001) - 1280)}px`,
+          '--xo-inner-half': `${Math.max(0, window.innerWidth / Math.max(scale, 0.001) - 1280) / 2}px`,
 transform: `translate(-50%, -50%) scale(${scale})` }}>
         {/* nền */}
         <div className="ms-bgimg" /><div className="ms-moon" />

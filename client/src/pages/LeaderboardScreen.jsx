@@ -1,3 +1,4 @@
+import "../components/balanced-stage.css"
 import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { photoOf } from '../lib/avatar.js'
 import { useCallback, useEffect, useState } from 'react'
@@ -259,6 +260,8 @@ export default function LeaderboardScreen() {
   return (
     <div className="hm-root">
       <div className="hm-stage jr-stage wr-stage lb-stage" style={{ width: Math.max(1280, window.innerWidth / Math.max(scale, 0.001)),
+          '--xo-gap': `${Math.max(0, window.innerWidth / Math.max(scale, 0.001) - 1280)}px`,
+          '--xo-inner-half': `${Math.max(0, window.innerWidth / Math.max(scale, 0.001) - 1280) / 2.63654}px`,
 transform: `translate(-50%, -50%) scale(${scale})` }}>
         <div className="lb-bg"><Backdrop /></div>
         {PETALS.slice(0, 12).map((p, i) => (

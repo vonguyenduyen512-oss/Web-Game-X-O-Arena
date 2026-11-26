@@ -1,3 +1,4 @@
+import "../components/balanced-stage.css"
 import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -224,6 +225,8 @@ export default function HowToPlayScreen() {
   return (
     <div className="hm-root">
       <div className="hm-stage jr-stage wr-stage sx-stage" style={{ width: Math.max(1280, window.innerWidth / Math.max(scale, 0.001)),
+          '--xo-gap': `${Math.max(0, window.innerWidth / Math.max(scale, 0.001) - 1280)}px`,
+          '--xo-inner-half': `${Math.max(0, window.innerWidth / Math.max(scale, 0.001) - 1280) / 2.66112}px`,
 transform: `translate(-50%, -50%) scale(${scale})` }}>
         <div className="sx-bg"><Backdrop /></div>
         {PETALS.slice(0, 12).map((p, i) => (

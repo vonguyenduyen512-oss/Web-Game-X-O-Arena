@@ -1,3 +1,4 @@
+import "../components/balanced-stage.css"
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useToast } from '../components/Layout.jsx'
@@ -430,6 +431,8 @@ export default function EventHot() {
   return (
     <div className="hm-root">
       <div className="hm-stage ev-stage" style={{ width: Math.max(1280, window.innerWidth / Math.max(scale, 0.001)),
+          '--xo-gap': `${Math.max(0, window.innerWidth / Math.max(scale, 0.001) - 1280)}px`,
+          '--xo-inner-half': `${Math.max(0, window.innerWidth / Math.max(scale, 0.001) - 1280) / 2.7263}px`,
 transform: `translate(-50%, -50%) scale(${scale})` }}>
         <Defs />
         <div className="ev-bg" />
