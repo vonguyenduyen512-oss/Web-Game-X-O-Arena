@@ -32,8 +32,10 @@ Yêu cầu Node.js phiên bản 20 trở lên.
 Mở thư mục dự án bằng Visual Studio Code và chạy các lệnh sau:
 
 ```powershell
+
 npm --prefix server install
 npm --prefix client install
+
 ```
 
 Cấu hình file `server/.env` và `client/.env` để sử dụng Supabase, Gmail OTP và Google Login.
