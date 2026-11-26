@@ -1,0 +1,57 @@
+﻿.xo-landscape-prompt {
+  display: none;
+}
+
+@media (pointer: coarse) and (orientation: portrait) and (max-width: 900px) {
+  .xo-landscape-prompt {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    background: linear-gradient(145deg, #10002f, #390080);
+    color: white;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+
+  .xo-landscape-panel {
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .xo-landscape-panel h2 {
+    font-size: 21px;
+    margin: 0;
+  }
+
+  .xo-landscape-panel p {
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .xo-landscape-panel button {
+    border: 0;
+    border-radius: 12px;
+    padding: 14px 22px;
+    background: #a500ff;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .xo-landscape-panel small {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #ffd1ff;
+  }
+}

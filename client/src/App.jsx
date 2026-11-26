@@ -1,3 +1,4 @@
+﻿import LandscapePrompt from './components/LandscapePrompt.jsx'
 
 import { Suspense, lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
@@ -66,6 +67,7 @@ export default function App() {
 
   return (
     <Suspense fallback={null}>
+      <LandscapePrompt />
       <Routes>
         <Route path="/" element={<Splash />} />
         <Route path="/login" element={<Login />} />
@@ -91,3 +93,4 @@ export default function App() {
     </Suspense>
   )
 }
+
