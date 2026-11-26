@@ -318,7 +318,7 @@ const vietnamDay = (at) => {
   return Number.isFinite(t) ? new Date(t + 7*3600000).toISOString().slice(0,10) : ''
 }
 const weekProgress = (matches, loginDays) => {
-  const week = matches.filter(m => m.onlineVerified === true && vietnamDay(m.at) >= WEEK_START && vietnamDay(m.at) <= WEEK_END)
+  const week = matches.filter(m => vietnamDay(m.at) >= WEEK_START && vietnamDay(m.at) <= WEEK_END)
   const ordered = [...week].sort((a,b) => Date.parse(a.at)-Date.parse(b.at))
   let streak = 0, best = 0
   for (const m of ordered) {
@@ -388,11 +388,12 @@ export default function EventHot() {
   const [toast, setToast] = useToast()
   const [tab, setTab] = useState('hot')
   const [claiming, setClaiming] = useState(false)
-  const wins = matches.filter(m => m.result === 'win').length
-  const POINTS = matches.length * 10 + wins * 20
+  const eventMatches = matches.filter(m => m.onlineVerified === true || (user?.guest && (m.room === 'AI' || m.room === 'LOCAL')))
+  const wins = eventMatches.filter(m => m.result === 'win').length
+  const POINTS = eventMatches.length * 10 + wins * 20
   const todayVN = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10)
   const checkedToday = (user?.loginDays || []).includes(todayVN)
-  const todayMatches = matches.filter(m => typeof m.at === 'string' && !Number.isNaN(Date.parse(m.at)) && new Date(new Date(m.at).getTime() + 7 * 3600000).toISOString().slice(0, 10) === todayVN)
+  const todayMatches = eventMatches.filter(m => typeof m.at === 'string' && !Number.isNaN(Date.parse(m.at)) && new Date(new Date(m.at).getTime() + 7 * 3600000).toISOString().slice(0, 10) === todayVN)
   const progress = [todayMatches.length, todayMatches.filter(m => m.result === 'win').length, new Set((user?.loginDays || []).filter(d => d.startsWith('2026-11'))).size]
   const claims = user?.eventClaims || []
   const fillX = pointX(POINTS)
@@ -477,7 +478,7 @@ transform: `translate(-50%, -50%) scale(${scale})` }}>
               ))}
             </div>
 
-            {tab === 'week' ? <WeeklyContent user={user} matches={matches} claims={claims} claimEventReward={claimEventReward} claiming={claiming} setClaiming={setClaiming} setToast={setToast} nav={nav} /> : tab === 'special' ? <SpecialEvent /> : tab === 'notice' ? <NoticeBoard /> : <Fragment>
+            {tab === 'week' ? <WeeklyContent user={user} matches={eventMatches} claims={claims} claimEventReward={claimEventReward} claiming={claiming} setClaiming={setClaiming} setToast={setToast} nav={nav} /> : tab === 'special' ? <SpecialEvent /> : tab === 'notice' ? <NoticeBoard /> : <Fragment>
             {/* thẻ sự kiện */}
             <div className="ev-card">
               <div className="ev-card-rays" />

@@ -374,24 +374,30 @@ async function api(req, res) {
   if (req.method === 'POST' && url === '/api/main/checkin') {
     const b = await readBody(req)
     const k = mainKey(req)
-    if (!k) return send(res, 401, { error: 'Sai thông tin tài khoản.' })
-    const entry = mainData[k]
+    const account = k ? null : authUser(req)
+    if (!k && !account) return send(res, 401, { error: 'Vui lòng đăng nhập lại.' })
+    const entry = k ? mainData[k] : { user: account, matches: account.matches || [] }
+    const persist = () => k ? atomicSave(MAIN_FILE, mainData) : saveUsers()
+    const publicEntry = () => ({ user: k ? entry.user : safe(entry.user), matches: entry.matches || [] })
     if (!entry?.user) return send(res, 404, { error: 'Không có dữ liệu tài khoản.' })
     const today = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10)
     const days = [...new Set((entry.user.loginDays || []).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d) && d <= today))]
-    if (days.includes(today)) return send(res, 200, { ok: true, already: true, data: entry })
+    if (days.includes(today)) return send(res, 200, { ok: true, already: true, data: publicEntry() })
     entry.user.loginDays = [...days, today]
     entry.user.updatedAt = Date.now()
     entry.user.rev = (entry.user.rev || 0) + 1
-    atomicSave(MAIN_FILE, mainData)
-    return send(res, 200, { ok: true, already: false, data: entry })
+    persist()
+    return send(res, 200, { ok: true, already: false, data: publicEntry() })
   }
   // Nhận thưởng trên server: kiểm tra điều kiện và ghi một lần, không tin phần thưởng client gửi.
   if (req.method === 'POST' && url === '/api/main/claim') {
     const b = await readBody(req)
     const k = mainKey(req)
-    if (!k) return send(res, 401, { error: 'Sai thông tin tài khoản.' })
-    const entry = mainData[k]
+    const account = k ? null : authUser(req)
+    if (!k && !account) return send(res, 401, { error: 'Vui lòng đăng nhập lại.' })
+    const entry = k ? mainData[k] : { user: account, matches: account.matches || [] }
+    const persist = () => k ? atomicSave(MAIN_FILE, mainData) : saveUsers()
+    const publicEntry = () => ({ user: k ? entry.user : safe(entry.user), matches: entry.matches || [] })
     if (!entry?.user) return send(res, 404, { error: 'Không có dữ liệu tài khoản.' })
     const id = String(b.id || '')
     const rewards = {
@@ -408,7 +414,7 @@ async function api(req, res) {
     if (weekMission || weekMile) {
       const u = entry.user
       const nowVN = new Date(Date.now() + 7*3600000).toISOString().slice(0,10)
-      if (nowVN < '2026-11-24' || nowVN > '2026-11-30') return send(res,409,{error:'Sự kiện tuần chưa diễn ra hoặc đã kết thúc.',data:entry})
+      if (nowVN < '2026-11-24' || nowVN > '2026-11-30') return send(res,409,{error:'Sự kiện tuần chưa diễn ra hoặc đã kết thúc.',data:publicEntry()})
       const history = (entry.matches || []).filter(m => m.onlineVerified === true && typeof m.at === 'string' && !Number.isNaN(Date.parse(m.at)) && (() => { const d = new Date(Date.parse(m.at) + 7*3600000).toISOString().slice(0,10); return d >= '2026-11-24' && d <= '2026-11-30' })())
       const sorted = [...history].sort((a,b)=>Date.parse(a.at)-Date.parse(b.at))
       let streak=0,best=0
@@ -418,8 +424,8 @@ async function api(req, res) {
       const max=[30,15,5,5,3]
       const points=progress.reduce((a,n,i)=>a+Math.min(n,max[i]),0)
       const eligible=weekMission ? progress[Number(weekMission[1])] >= max[Number(weekMission[1])] : points>=Number(weekMile[1])
-      if(!eligible)return send(res,409,{error:'Chưa đủ điều kiện nhận thưởng.',data:entry})
-      if((u.eventClaims||[]).includes(id))return send(res,409,{error:'Đã nhận phần thưởng này.',data:entry})
+      if(!eligible)return send(res,409,{error:'Chưa đủ điều kiện nhận thưởng.',data:publicEntry()})
+      if((u.eventClaims||[]).includes(id))return send(res,409,{error:'Đã nhận phần thưởng này.',data:publicEntry()})
       const missionRewards=[{kind:'coin',n:1000},{kind:'gem',n:100},{kind:'coin',n:200},{kind:'coin',n:500},{kind:'gem',n:50}]
       const mileRewards={10:{kind:'coin',n:500},20:{kind:'gem',n:50},30:{kind:'coin',n:200},40:{kind:'gem',n:5000},50:{kind:'coin',n:1000}}
       const reward=weekMission?missionRewards[Number(weekMission[1])]:mileRewards[Number(weekMile[1])]
@@ -429,14 +435,14 @@ async function api(req, res) {
       if(reward.kind==='frame')u.frames=[...new Set([...(u.frames||[]),reward.id])]
       u.rev=(u.rev||0)+1
       u.updatedAt=Date.now()
-      atomicSave(MAIN_FILE, mainData)
-      return send(res,200,{ok:true,data:entry})
+      persist()
+      return send(res,200,{ok:true,data:publicEntry()})
     }
     const today = new Date(Date.now() + 7 * 3600000).toISOString().slice(0, 10)
     const daily = /^nov26:daily:(\d{4}-\d{2}-\d{2}):(m[12])$/.exec(id)
     const dailyReward = daily?.[2] === 'm1' ? { kind: 'coin', n: 500 } : daily?.[2] === 'm2' ? { kind: 'gem', n: 50 } : null
     if (daily && (daily[1] !== today || !today.startsWith('2026-11-'))) return send(res, 409, { error: 'Nhiệm vụ này không thuộc ngày hôm nay.' })
-    const reward = daily ? dailyReward : rewards[id]
+    const reward = daily ? dailyReward : Object.hasOwn(rewards, id) ? rewards[id] : null
     if (!reward) return send(res, 400, { error: 'Phần thưởng không hợp lệ.' })
     const history = Array.isArray(entry.matches) ? entry.matches.filter(m => m.onlineVerified === true) : []
     const wins = history.filter(m => m.result === 'win').length
@@ -448,16 +454,17 @@ async function api(req, res) {
       : id === 'nov26:m2' ? wins >= 5
       : id === 'nov26:m3' ? days >= 7
       : points >= Number(id.split(':').at(-1))
-    if (!eligible) return send(res, 409, { error: 'Chưa đạt điều kiện nhận thưởng.', data: entry })
+    if (!eligible) return send(res, 409, { error: 'Chưa đạt điều kiện nhận thưởng.', data: publicEntry() })
     const u = entry.user
-    if ((u.eventClaims || []).includes(id)) return send(res, 409, { error: 'Phần thưởng đã nhận.', data: entry })
+    if ((u.eventClaims || []).includes(id)) return send(res, 409, { error: 'Phần thưởng đã nhận.', data: publicEntry() })
     u.eventClaims = [...(u.eventClaims || []), id]
     if (reward.kind === 'coin') u.coins = (u.coins || 0) + reward.n
     if (reward.kind === 'gem') u.gems = (u.gems || 0) + reward.n
     if (reward.kind === 'frame') u.frames = [...new Set([...(u.frames || []), reward.id])]
+    u.rev = (u.rev || 0) + 1
     u.updatedAt = Date.now()
-    atomicSave(MAIN_FILE, mainData)
-    return send(res, 200, { ok: true, data: entry })
+    persist()
+    return send(res, 200, { ok: true, data: publicEntry() })
   }
   if (req.method === 'POST' && url === '/api/main/load') {
     const b = await readBody(req)
@@ -699,7 +706,7 @@ const account = users.find(
       level: 1,
       exp: 0,
       coins: 500,
-      gems: 500,
+      gems: 1000, welcome1000Granted: true, // XO_OTP_1000_V1
       score: 0,
       hash: data.hash,
       createdAt: Date.now()
@@ -815,6 +822,12 @@ const account = users.find(
       return send(res, 401, { error: 'Sai tên đăng nhập hoặc mật khẩu.' })
     }
 
+    // XO_EMAIL_WELCOME_1000_V1
+    if (!u.welcome1000Granted) {
+      u.gems = Math.max(1000, Number(u.gems) || 0)
+      u.welcome1000Granted = true
+      saveUsers()
+    }
     return send(res, 200, {
   token: sign(u),
   user: safe(u),

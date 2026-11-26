@@ -90,6 +90,79 @@ const newUser = ({ name, email = '', birthday = '', guest = false, main = false 
   }
 }
 
+// Guest rewards are local-only; never submitted as verified server rewards.
+const guestClaim = (user, matches, rewardId) => {
+  const entry = { user: { ...user }, matches }
+  const res = null
+  const send = (_, code, data) => ({ ...data, ok: code === 200 && !!data.ok })
+    const id = String(rewardId || '')
+    const rewards = {
+      'nov26:m1': { kind: 'coin', n: 500 },
+      'nov26:m2': { kind: 'gem', n: 50 },
+      'nov26:m3': { kind: 'coin', n: 200 },
+      'nov26:mile:200': { kind: 'coin', n: 500 },
+      'nov26:mile:500': { kind: 'gem', n: 100 },
+      'nov26:mile:1000': { kind: 'coin', n: 200 },
+      'nov26:mile:2000': { kind: 'gem', n: 5000 },
+    }
+    const weekMission = /^week26:mission:([0-4])$/.exec(id)
+    const weekMile = /^week26:mile:(10|20|30|40|50)$/.exec(id)
+    if (weekMission || weekMile) {
+      const u = entry.user
+      const nowVN = new Date(Date.now() + 7*3600000).toISOString().slice(0,10)
+      if (nowVN < '2026-11-24' || nowVN > '2026-11-30') return send(res,409,{error:'Sự kiện tuần chưa diễn ra hoặc đã kết thúc.',data:entry})
+      const history = (entry.matches || []).filter(m => (m.onlineVerified === true || m.room === 'AI' || m.room === 'LOCAL') && typeof m.at === 'string' && !Number.isNaN(Date.parse(m.at)) && (() => { const d = new Date(Date.parse(m.at) + 7*3600000).toISOString().slice(0,10); return d >= '2026-11-24' && d <= '2026-11-30' })())
+      const sorted = [...history].sort((a,b)=>Date.parse(a.at)-Date.parse(b.at))
+      let streak=0,best=0
+      for(const m of sorted){streak=m.result==='win'?streak+1:0;best=Math.max(best,streak)}
+      const days=new Set((u.loginDays||[]).filter(d=>d>='2026-11-24'&&d<='2026-11-30')).size
+      const progress=[history.length,history.filter(m=>m.result==='win').length,history.filter(m=>m.friendMatch===true).length,days,best]
+      const max=[30,15,5,5,3]
+      const points=progress.reduce((a,n,i)=>a+Math.min(n,max[i]),0)
+      const eligible=weekMission ? progress[Number(weekMission[1])] >= max[Number(weekMission[1])] : points>=Number(weekMile[1])
+      if(!eligible)return send(res,409,{error:'Chưa đủ điều kiện nhận thưởng.',data:entry})
+      if((u.eventClaims||[]).includes(id))return send(res,409,{error:'Đã nhận phần thưởng này.',data:entry})
+      const missionRewards=[{kind:'coin',n:1000},{kind:'gem',n:100},{kind:'coin',n:200},{kind:'coin',n:500},{kind:'gem',n:50}]
+      const mileRewards={10:{kind:'coin',n:500},20:{kind:'gem',n:50},30:{kind:'coin',n:200},40:{kind:'gem',n:5000},50:{kind:'coin',n:1000}}
+      const reward=weekMission?missionRewards[Number(weekMission[1])]:mileRewards[Number(weekMile[1])]
+      u.eventClaims=[...(u.eventClaims||[]),id]
+      if(reward.kind==='coin')u.coins=(u.coins||0)+reward.n
+      if(reward.kind==='gem')u.gems=(u.gems||0)+reward.n
+      if(reward.kind==='frame')u.frames=[...new Set([...(u.frames||[]),reward.id])]
+      u.rev=(u.rev||0)+1
+      u.updatedAt=Date.now()
+
+      return send(res,200,{ok:true,data:entry})
+    }
+    const today = new Date(Date.now() + 7 * 3600000).toISOString().slice(0, 10)
+    const daily = /^nov26:daily:(\d{4}-\d{2}-\d{2}):(m[12])$/.exec(id)
+    const dailyReward = daily?.[2] === 'm1' ? { kind: 'coin', n: 500 } : daily?.[2] === 'm2' ? { kind: 'gem', n: 50 } : null
+    if (daily && (daily[1] !== today || !today.startsWith('2026-11-'))) return send(res, 409, { error: 'Nhiệm vụ này không thuộc ngày hôm nay.' })
+    const reward = daily ? dailyReward : Object.hasOwn(rewards, id) ? rewards[id] : null
+    if (!reward) return send(res, 400, { error: 'Phần thưởng không hợp lệ.' })
+    const history = Array.isArray(entry.matches) ? entry.matches.filter(m => (m.onlineVerified === true || m.room === 'AI' || m.room === 'LOCAL')) : []
+    const wins = history.filter(m => m.result === 'win').length
+    const points = history.length * 10 + wins * 20
+    const days = new Set((entry.user.loginDays || []).filter(d => /^2026-11-\d{2}$/.test(d))).size
+    const todayHistory = history.filter(m => typeof m.at === 'string' && !Number.isNaN(Date.parse(m.at)) && new Date(Date.parse(m.at) + 7 * 3600000).toISOString().slice(0, 10) === today)
+    const eligible = daily ? (daily[2] === 'm1' ? todayHistory.length >= 10 : todayHistory.filter(m => m.result === 'win').length >= 5)
+      : id === 'nov26:m1' ? history.length >= 10
+      : id === 'nov26:m2' ? wins >= 5
+      : id === 'nov26:m3' ? days >= 7
+      : points >= Number(id.split(':').at(-1))
+    if (!eligible) return send(res, 409, { error: 'Chưa đạt điều kiện nhận thưởng.', data: entry })
+    const u = entry.user
+    if ((u.eventClaims || []).includes(id)) return send(res, 409, { error: 'Phần thưởng đã nhận.', data: entry })
+    u.eventClaims = [...(u.eventClaims || []), id]
+    if (reward.kind === 'coin') u.coins = (u.coins || 0) + reward.n
+    if (reward.kind === 'gem') u.gems = (u.gems || 0) + reward.n
+    if (reward.kind === 'frame') u.frames = [...new Set([...(u.frames || []), reward.id])]
+    u.rev = (u.rev || 0) + 1
+    u.updatedAt = Date.now()
+
+    return send(res, 200, { ok: true, data: entry })
+}
+
 export function AppProvider({ children }) {
   const [user, setUser] = useState(() => {
     const u = load('xo_user', null)
@@ -142,6 +215,12 @@ useEffect(() => {
   useEffect(() => save('xo_user', user), [user])
   useEffect(() => save('xo_matches', matches), [matches])
   useEffect(() => save('xo_settings', settings), [settings])
+  // XO_GUEST_PERSIST_V1
+  useEffect(() => {
+    if (user?.guest) {
+      save('xo_guest_profile_v1', { user, matches })
+    }
+  }, [user, matches])
   // Tài khoản chính: lưu riêng, không bị ghi đè khi đăng nhập tài khoản khác
   useEffect(() => { if (user?.main && mainKeyOf(user)) save(mainStoreKey(mainKeyOf(user)), { user, matches }) }, [user, matches])
 
@@ -255,14 +334,25 @@ useEffect(() => {
   }
 
   const guestLogin = () => {
-  localStorage.removeItem('xo_player_token')
-  const guest = newUser({
-    name: 'Khach' + Math.floor(Math.random() * 9000 + 1000),
-    guest: true
-  })
-  setUser({ ...guest, coins: 500, gems: 500 })
-  setMatches([])
-}
+    localStorage.removeItem('xo_player_token')
+
+    const savedGuest = load('xo_guest_profile_v1', null)
+    const validGuest = savedGuest?.user?.guest === true
+
+    const guest = validGuest
+      ? savedGuest.user
+      : {
+          ...newUser({
+            name: 'Khach' + Math.floor(Math.random() * 9000 + 1000),
+            guest: true
+          }),
+          coins: 500,
+          gems: 1000
+        }
+
+    setUser(guest)
+    setMatches(validGuest ? (savedGuest.matches || []) : [])
+  }
   // Đăng xuất: dữ liệu tài khoản chính đã nằm trong xo_main nên không mất
   const logout = () => { localStorage.removeItem('xo_player_token'); setUser(null); setMatches([]) }
 
@@ -298,44 +388,38 @@ useEffect(() => {
   // Nhận thưởng qua server, không tự cộng số dư ở trình duyệt.
 // Nhận thưởng trực tiếp qua Backend.
 // Backend kiểm tra điều kiện và chống nhận trùng.
-const claimEventReward = async (id) => {
-  if (!user?.main || !mainKeyOf(user)) {
-    return {
-      ok: false,
-      error: 'Hãy đăng nhập tài khoản cố định.'
-    }
-  }
-
-  try {
-    const r = await postMain('/claim', mainKeyOf(user), { id })
-
-    if (r.data?.user) {
-      setUser(fixExp({ ...r.data.user, main: true }))
-      setMatches(r.data.matches || [])
-    }
-
-    return {
-      ok: !!r.ok,
-      error: r.error
-    }
-  } catch {
-    return {
-      ok: false,
-      error: 'Không kết nối được server. Vui lòng thử lại.'
-    }
-  }
-}
-  const checkInToday = async () => {
-    if (!user?.main || !mainKeyOf(user)) return { ok: false, error: 'Hãy đăng nhập tài khoản cố định.' }
+const eventBusy = useRef(false)
+  const eventAction = async (path, id) => {
+    if (!user) return { ok: false, error: 'Chưa đăng nhập.' }
+    if (eventBusy.current) return { ok: false, error: 'Đang xử lý.' }
+    eventBusy.current = true
     try {
-      const r = await postMain('/checkin', mainKeyOf(user))
+      if (user.guest) {
+        const saved = load('xo_guest_profile_v1', null)
+        const current = saved?.user?.id === user.id ? saved.user : user
+        let r
+        if (path === '/checkin') {
+          const today = new Date(Date.now() + 7*3600000).toISOString().slice(0,10)
+          const days = current.loginDays || []
+          r = { ok: true, already: days.includes(today), data: { user: { ...current, loginDays: [...new Set([...days,today])] }, matches } }
+        } else r = guestClaim(current, matches, id)
+        if (r.ok && r.data?.user) {
+          save('xo_guest_profile_v1', r.data)
+          setUser(fixExp(r.data.user))
+        }
+        return r
+      }
+      const r = await postMain(path, mainKeyOf(user), id ? { id } : {})
       if (r.data?.user) {
-        setUser(fixExp({ ...r.data.user, main: true }))
+        setUser(fixExp({ ...r.data.user, main: !!user.main }))
         setMatches(r.data.matches || [])
       }
-      return { ok: !!r.ok, already: !!r.already, error: r.error }
+      return r
     } catch { return { ok: false, error: 'Không kết nối được server.' } }
+    finally { eventBusy.current = false }
   }
+  const claimEventReward = id => eventAction('/claim', id)
+  const checkInToday = () => eventAction('/checkin')
 
   const renameProfile = async (name) => {
     if (!user || user.guest) return { ok: false, error: 'Tài khoản khách không thể đổi tên.' }
