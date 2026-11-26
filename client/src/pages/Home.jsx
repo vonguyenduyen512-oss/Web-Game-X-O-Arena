@@ -145,7 +145,7 @@ export default function Home() {
 
   return (
     <div className="hm-root">
-      <div className="hm-stage" style={{ transform: `translate(-50%, -50%) scale(${window.matchMedia("(orientation: landscape) and (pointer: coarse)").matches ? window.innerWidth / 1280 : scale}, ${scale})` }}>
+      <div className="hm-stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
         {/* ===== nền ===== */}
         <div className="hm-bg" />
         <div className="hm-city" />
