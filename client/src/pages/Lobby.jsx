@@ -31,6 +31,7 @@ const CSS = `
   border-radius: 50%;
 }
 .lb-root{position:fixed;inset:0;overflow:hidden;background:#070a3a;font-family:${F};color:#fff}
+@media (orientation: landscape) and (pointer: coarse) { .lb-root { background: linear-gradient(145deg,#16147a,#351078); } }
 .lb-stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center;overflow:hidden;user-select:none;
   background:
     radial-gradient(ellipse 520px 360px at 12% 45%,rgba(46,120,255,.38),transparent 70%),

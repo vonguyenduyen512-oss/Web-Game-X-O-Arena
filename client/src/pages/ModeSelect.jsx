@@ -9,6 +9,7 @@ import { useApp } from '../store.jsx'
 
 const CSS = `
 .ms-root{position:fixed;inset:0;overflow:hidden;background:#070a3a;font-family:'Baloo 2',system-ui,sans-serif;color:#fff}
+@media (orientation: landscape) and (pointer: coarse) { .ms-root { background: linear-gradient(145deg,#16147a,#351078); } }
 .ms-stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center;overflow:hidden;user-select:none;
   background:
     radial-gradient(ellipse 520px 320px at 12% 38%,rgba(46,120,255,.38),transparent 70%),

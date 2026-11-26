@@ -106,14 +106,24 @@ const PETALS = Array.from({ length: 16 }, (_, i) => ({
 
 /* thu phóng stage 1280x720 theo cửa sổ */
 function useFit(w, h) {
-  const calc = () => Math.min(window.innerWidth / w, window.innerHeight / h)
-  const [s, setS] = useState(calc)
+  const calc = () => {
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+    const scale = Math.min(vw / w, vh / h)
+    const landscape = window.matchMedia('(orientation: landscape) and (pointer: coarse)').matches
+    return { scale, width: landscape ? Math.max(w, vw / Math.max(scale, 0.001)) : w }
+  }
+  const [fit, setFit] = useState(calc)
   useEffect(() => {
-    const f = () => setS(calc())
+    const f = () => setFit(calc())
     window.addEventListener('resize', f)
-    return () => window.removeEventListener('resize', f)
-  }, [])
-  return s
+    window.addEventListener('orientationchange', f)
+    return () => {
+      window.removeEventListener('resize', f)
+      window.removeEventListener('orientationchange', f)
+    }
+  }, [w, h])
+  return fit
 }
 
 function Avatar({ avatar }) {
@@ -128,7 +138,7 @@ export default function Home() {
   const { user } = useApp()
   const { players: lbPlayers } = useLeaderboard()
   const [toast, setToast] = useToast()
-  const scale = useFit(1280, 720)
+  const { scale, width } = useFit(1280, 720)
   const [slide, setSlide] = useState(0)
   const [left, setLeft] = useState(countdown)
 
@@ -145,7 +155,7 @@ export default function Home() {
 
   return (
     <div className="hm-root">
-      <div className="hm-stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
+      <div className="hm-stage hm-adaptive-home" style={{ width, '--hm-extra': `${(width - 1280) / 2}px`, transform: `translate(-50%, -50%) scale(${scale})` }}>
         {/* ===== nền ===== */}
         <div className="hm-bg" />
         <div className="hm-city" />
@@ -227,7 +237,7 @@ export default function Home() {
           <button className="hm-tile t1" onClick={() => nav('/events')}><Ico n="flame" size={34} fill="currentColor" sw={1} /><span>Sự kiện<br />Hot</span><em>!</em></button>
         </div>
         {/* Hình trang trí cạnh Sự kiện Hot, không phải nút bấm */}
-        <div aria-hidden="true" style={{position:'absolute',left:634,top:528,width:296,height:98,borderRadius:14,overflow:'hidden',border:'1.5px solid rgba(180,120,255,.8)',boxShadow:'0 0 14px rgba(170,80,255,.45)',pointerEvents:'none'}}><img src="/img/home-event-decoration.png" alt="" style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}} /></div>
+        <div aria-hidden="true" style={{position:'absolute',left:'calc(634px + var(--hm-extra, 0px))',top:528,width:296,height:98,borderRadius:14,overflow:'hidden',border:'1.5px solid rgba(180,120,255,.8)',boxShadow:'0 0 14px rgba(170,80,255,.45)',pointerEvents:'none'}}><img src="/img/home-event-decoration.png" alt="" style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}} /></div>
 
         {/* ===== banner + chat ===== */}
         <div className="hm-banner" onClick={() => nav(sl.to)} key={slide}>

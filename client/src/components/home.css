@@ -166,3 +166,11 @@
 .hm-lb-row b { font-size: .92rem; color: #ffe27a; }
 
 .hm-tagline { position: absolute; right: 18px; bottom: 6px; font-style: italic; font-weight: 800; font-size: 1.4rem; text-shadow: 0 0 12px #ff4fd8, 0 2px 0 rgba(60, 0, 80, .8); }
+/* Landscape: expand the layout, never stretch its contents. */
+.hm-adaptive-home .hm-currency { left: calc(414px + var(--hm-extra, 0px)); }
+.hm-adaptive-home .hm-cta-wrap.q { left: calc(276px + var(--hm-extra, 0px)); }
+.hm-adaptive-home .hm-cta-wrap.j { right: calc(276px + var(--hm-extra, 0px)); }
+.hm-adaptive-home .hm-tiles { left: calc(486px + var(--hm-extra, 0px)); }
+@media (orientation: landscape) and (pointer: coarse) {
+  .hm-root { background: linear-gradient(145deg, #141052, #351078); }
+}
