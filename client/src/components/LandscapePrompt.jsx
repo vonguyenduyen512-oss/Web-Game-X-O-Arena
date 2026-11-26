@@ -1,8 +1,11 @@
 ﻿import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import './landscape-prompt.css'
 
 export default function LandscapePrompt() {
   const [message, setMessage] = useState('')
+  const { pathname } = useLocation()
+  const isGame = /^\/game\/[^/]+\/?$/.test(pathname)
 
   async function turnLandscape() {
     try {
@@ -21,10 +24,12 @@ export default function LandscapePrompt() {
       setMessage('')
     } catch {
       setMessage(
-        'Trinh duyet khong ho tro tu xoay. Hay bat xoay tu dong va xoay ngang dien thoai.'
+        'Trình duyệt không hỗ trợ tự xoay. Hãy bật xoay tự động và xoay ngang điện thoại.'
       )
     }
   }
+
+  if (!isGame) return null
 
   return (
     <div className="xo-landscape-prompt">
@@ -47,14 +52,14 @@ export default function LandscapePrompt() {
           <path d="m21 20-4 0 0-4" />
         </svg>
 
-        <h2>XOAY NGANG MAN HINH</h2>
+        <h2>XOAY NGANG MÀN HÌNH</h2>
         <p>
-          X-O Arena duoc toi uu cho che do ngang.
-          Hay xoay dien thoai de choi game.
+          X-O Arena được tối ưu cho chế độ ngang.
+          Hãy xoay điện thoại để chơi game.
         </p>
 
         <button type="button" onClick={turnLandscape}>
-          Bat che do ngang
+          Bật chế độ ngang
         </button>
 
         {message && <small>{message}</small>}
@@ -62,3 +67,4 @@ export default function LandscapePrompt() {
     </div>
   )
 }
+
