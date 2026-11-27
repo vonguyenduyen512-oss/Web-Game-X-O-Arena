@@ -191,9 +191,28 @@ export default function Home() {
         </div>
 
         {/* ===== menu trái ===== */}
-        <nav className="hm-side">
+       <nav
+  className="hm-side"
+  style={{
+    position: 'relative',
+    zIndex: 9999,
+    pointerEvents: 'auto'
+  }}
+>
           {NAV.map(([to, ic, label]) => (
-            <NavLink key={to} to={to} className={({ isActive }) => `hm-nav ${isActive ? 'on' : ''} c-${ic}`}>
+            <NavLink
+  key={to}
+  to={to}
+  onClick={(e) => {
+    if (to === '/how-to-play') {
+      e.preventDefault()
+      window.location.assign('/how-to-play')
+    }
+  }}
+  className={({ isActive }) =>
+    `hm-nav ${isActive ? 'on' : ''} c-${ic}`
+  }
+>
               <Ico n={ic} size={24} fill={ic === 'home' ? 'currentColor' : 'none'} />
               <span>{label}</span>
             </NavLink>

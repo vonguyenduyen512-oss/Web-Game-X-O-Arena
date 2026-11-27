@@ -243,3 +243,42 @@
   .hm-adaptive-home .hm-chat { grid-row:10; height:auto; min-height:44px; }
   .hm-adaptive-home .hm-tagline { grid-row:11; text-align:center; font-size:16px; }
 }
+
+
+/* XO_ARENA_HOME_NAV_FIX */
+.hm-stage .hm-side {
+  z-index: 99999 !important;
+  pointer-events: auto !important;
+}
+
+.hm-stage .hm-side .hm-nav {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.hm-stage .hm-side .hm-nav.c-book {
+  z-index: 2;
+  pointer-events: auto !important;
+}
+
+/* FIX_VIETNAMESE_FONT_HOME */
+.hm-root,
+.hm-stage,
+.hm-side,
+.hm-nav,
+.hm-nav span,
+.hm-cta,
+.hm-cta small,
+.hm-cta b,
+.hm-banner,
+.hm-banner h3,
+.hm-banner p,
+.hm-lb,
+.hm-lb-head,
+.hm-lb-row,
+.hm-chat,
+.hm-tagline {
+    font-family: "Segoe UI", Arial, sans-serif !important;
+}

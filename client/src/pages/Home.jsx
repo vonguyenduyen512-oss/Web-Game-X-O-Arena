@@ -1,10 +1,10 @@
+import '../components/home.css';
 import { XoSvg, XoAvatar } from '../components/XoSvg.jsx'
 import { photoOf } from '../lib/avatar.js'
 import { useCallback, useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useToast } from '../components/Layout.jsx'
 import { useApp } from '../store.jsx'
-import '../components/home.css'
 
 /* ---------- bảng xếp hạng top 3 (lấy từ /api/leaderboard) ---------- */
 const norm = (x) => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().trim().replace(/\s+/g, ' ')
@@ -83,7 +83,6 @@ const NAV = [
   ['/settings', 'gear', 'Cài đặt'],
   ['/how-to-play', 'book', 'Hướng dẫn'],
 ]
-
 const SLIDES = [
   { title: 'X-O ARENA', text: <>Cùng nhau tạo nên<br />những trận đấu đỉnh cao!</>, to: '/mode' },
   { title: 'KẾT BẠN BÈ', text: <>Tạo phòng riêng, mời bạn bè<br />cùng so tài Caro!</>, to: '/create-room' },
@@ -199,16 +198,26 @@ export default function Home() {
 
         {/* ===== menu trái ===== */}
         <nav className="hm-side">
-          {NAV.map(([to, ic, label]) => (
-            <NavLink key={to} to={to} className={({ isActive }) => `hm-nav ${isActive ? 'on' : ''} c-${ic}`}>
-              <Ico n={ic} size={24} fill={ic === 'home' ? 'currentColor' : 'none'} />
-              <span>{label}</span>
-            </NavLink>
-          ))}
-        </nav>
+  {NAV.map(([to, ic, label]) => (
+    <NavLink
+      key={to}
+      to={to}
+      className={({ isActive }) =>
+        `hm-nav ${isActive ? 'on' : ''} c-${ic}`
+      }
+    >
+      <Ico
+        n={ic}
+        size={24}
+        fill={ic === 'home' ? 'currentColor' : 'none'}
+      />
+      <span>{label}</span>
+    </NavLink>
+  ))}
+</nav>
 
         {/* ===== trung tâm ===== */}
-        <img className="hm-logo" src="/img/logo.png" alt="X-O Arena – Caro Trực Tuyến" />
+        <img className="hm-logo" src="/img/logo.png" alt="X-O Arena â€“ Caro Trực Tuyến" />
         {/* Chỉ bỏ nền tối phía sau khẩu hiệu, giữ nguyên chữ trắng */}
         <style>{`.hm-stage .hm-slogan, .hm-stage .hm-slogan span { background: transparent !important; background-image: none !important; box-shadow: none !important; backdrop-filter: none !important; }
           .hm-stage .hm-slogan::before, .hm-stage .hm-slogan::after,
@@ -275,7 +284,7 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="hm-tagline">Carô – Kết nối đam mê!</div>
+        <div className="hm-tagline">Carô â€“ Kết nối đam mê!</div>
       </div>
       {toast}
     </div>
