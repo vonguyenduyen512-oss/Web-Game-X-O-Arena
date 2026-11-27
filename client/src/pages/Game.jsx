@@ -7,7 +7,7 @@ import { useApp } from '../store.jsx'
 import { useToast } from '../components/Layout.jsx'
 import { Crown, PETALS, TopHud, useFit } from '../components/hud.jsx'
 import { Backdrop, BigCrown, ChatBubble, Chev, NeonFrame, ReadyPill, Silhouette } from './WaitingRoom.jsx'
-import { SIZE, TURN_TIME, aiMove, boardFromMoves, checkWin, createBoard } from '../lib/game.js'
+import { SIZE, TURN_TIME, boardFromMoves, checkWin, createBoard } from '../lib/game.js'
 import { call, connect, socket } from '../lib/socket.js'
 import { enterGameMusic, leaveGameMusic, moveSound, isMusicEnabled, toggleGameMusic } from '../lib/gameAudio.js' // XO_SOUND_2026
 import '../components/home.css'
@@ -184,6 +184,10 @@ export default function Game() {
   const [toast, setToast] = useToast()
   const [s, dispatch] = useReducer(reducer, null, init)
   const ai = code === 'AI'
+  const aiSession = useRef(null)
+  const aiFinal = useRef(null)
+  const aiBusy = useRef(false)
+  const [aiReady, setAiReady] = useState(false)
   const local = code === 'LOCAL' || ai // chơi offline (không qua server)
   const [mySym, setMySym] = useState('X')
   const [opp, setOpp] = useState(ai ? { name: 'Máy (AI)', level: null, avatar: '🤖' } : local ? { name: 'Người chơi 2', level: 1, avatar: '🧑' } : { name: 'Đối thủ', level: 1, avatar: '🧑' })
@@ -221,19 +225,58 @@ export default function Game() {
   // Đồng hồ lượt
   useEffect(() => {
     if (s.over) return undefined
-    const t = setInterval(() => dispatch({ type: 'tick', local }), 1000)
+    const t = setInterval(() => dispatch({ type: 'tick', local: local && !ai }), 1000)
     return () => clearInterval(t)
   }, [s.over, local])
 
-  // Chế độ AI: máy đánh quân O sau một nhịp suy nghĩ
+  // AI runs on Backend. Browser never chooses AI moves or awards currency.
+  const aiRequest = async (action, payload = {}) => {
+    const token = localStorage.getItem('xo_player_token') || ''
+    if (!token) throw new Error('Bạn cần đăng nhập để chơi với AI.')
+    const r = await fetch('/api/ai/' + action, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ id: aiSession.current, ...payload })
+    })
+    const data = await r.json()
+    if (!r.ok || !data.ok) throw new Error(data.error || 'Không kết nối được Backend AI.')
+    if (data.state?.id) aiSession.current = data.state.id
+    if (data.match) {
+      aiFinal.current = data.match
+      applyMatchBalance(data.match.balance)
+    }
+    if (data.state) dispatch({ type: 'sync', state: {
+      ...data.state, board: data.state.board, moves: data.state.moves,
+      time: data.state.time, over: data.state.over
+    } })
+    return data
+  }
   useEffect(() => {
-    if (!ai || s.over || s.turn !== 'O') return undefined
-    const t = setTimeout(() => {
-      const { x, y } = aiMove(s.board)
-      dispatch({ type: 'move', x, y })
-    }, 500 + Math.random() * 500)
-    return () => clearTimeout(t)
-  }, [ai, s.turn, s.over, s.board])
+    if (!ai) return undefined
+    let active = true
+    aiSession.current = null
+    aiFinal.current = null
+    saved.current = false
+    setAiReady(false)
+    aiRequest('start').then(() => { if (active) setAiReady(true) })
+      .catch(e => { if (active) setToast(e.message) })
+    return () => { active = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code])
+  useEffect(() => {
+    if (!ai || !aiReady || s.over) return undefined
+    const t = setInterval(() => {
+      if (!aiBusy.current && aiSession.current) aiRequest('state').catch(e => setToast(e.message))
+    }, 3000)
+    return () => clearInterval(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ai, aiReady, s.over])
+  const aiAction = async (action, payload = {}) => {
+    if (!aiReady || aiBusy.current || s.over) return
+    aiBusy.current = true
+    try { await aiRequest(action, payload) }
+    catch (e) { setToast(e.message) }
+    finally { aiBusy.current = false }
+  }
 
   // Online: đồng bộ trạng thái phòng + nhận nước đi / kết quả / chat từ server
   useEffect(() => {
@@ -341,8 +384,12 @@ export default function Game() {
       score: res === 'win' ? '1 - 0' : res === 'lose' ? '0 - 1' : '0 - 0',
       reason: s.over.reason, at: new Date().toISOString(),
     }
-    addMatch(match)
-    const t = setTimeout(() => nav('/result', { state: { match, line: s.over.line }, replace: true }), 1500)
+    if (ai) {
+      if (!aiFinal.current) return undefined
+      addMatch(aiFinal.current)
+    } else addMatch(match)
+    const finalMatch = ai ? aiFinal.current : match
+    const t = setTimeout(() => nav('/result', { state: { match: finalMatch, line: s.over.line }, replace: true }), 1500)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [s.over])
@@ -351,7 +398,7 @@ export default function Game() {
 
   if (!user) return null
   const mine = s.turn === (local ? 'X' : mySym) && !s.over // đang tới lượt của "bạn" (bên trái)
-  const playing = !s.over && (ai ? s.turn === 'X' : local || s.turn === mySym) // AI: chỉ khi tới lượt bạn; local: cả hai cùng click; online: khi tới lượt mình
+  const playing = !s.over && (ai ? aiReady && !aiBusy.current && s.turn === 'X' : local || s.turn === mySym) // AI: chỉ khi tới lượt bạn; local: cả hai cùng click; online: khi tới lượt mình
   const last = s.moves[s.moves.length - 1]
   const mm = '00:' + String(s.time).padStart(2, '0')
   const soon = (n) => () => setToast(`${n}: tính năng sẽ bổ sung sau`)
@@ -360,6 +407,7 @@ export default function Game() {
   const leave = () => {
     if (s.over) return nav('/home')
     if (!window.confirm('Thoát phòng sẽ bị xử thua. Bạn chắc chắn?')) return undefined
+    if (ai) return aiAction('resign')
     if (local) return dispatch({ type: 'resign', side: 'X' }) // AI/LOCAL: thoát = bên X thua
     socket.emit('room:leave')
     return nav('/home')
@@ -416,16 +464,18 @@ export default function Game() {
       </div>
       <MobileBoard board={s.board} onCell={(x,y) => {
         if (!playing) return
-        if (local) dispatch({ type: 'move', x, y })
+        if (ai) aiAction('move', { x, y })
+        else if (local) dispatch({ type: 'move', x, y })
         else socket.emit('game:move', { x, y })
       }} line={s.over?.line} last={last} disabled={!playing} enlarged={enlarged} />
       <div className="xo-mobile-actions">
         <button type="button" disabled={!!s.over} onClick={() => {
           if (!window.confirm('Đầu hàng và nhận thua?')) return
-          if (local) dispatch({ type: 'resign', side: ai ? 'X' : s.turn })
+          if (ai) aiAction('resign')
+          else if (local) dispatch({ type: 'resign', side: s.turn })
           else socket.emit('game:resign')
         }}>Đầu hàng</button>
-        <button type="button" disabled={!!s.over || s.moves.length < 6} onClick={() => {
+        <button type="button" disabled={ai || !!s.over || s.moves.length < 6} onClick={() => {
           if (local) { if (window.confirm('Hai người đồng ý hòa trận?')) dispatch({ type: 'draw' }) }
           else { socket.emit('draw:offer'); setToast('Đã gửi đề nghị hòa') }
         }}>Đề nghị hòa</button>
@@ -516,7 +566,7 @@ transform: `translate(-50%, -50%) scale(${scale})` }}>
           </section>
 
           {/* ===== bàn cờ ===== */}
-          <GameBoard board={s.board} onCell={(x, y) => { if (!playing) return; if (local) dispatch({ type: 'move', x, y }); else socket.emit('game:move', { x, y }) }} line={s.over?.line} last={last} disabled={!playing} />
+          <GameBoard board={s.board} onCell={(x, y) => { if (!playing) return; if (ai) aiAction('move', { x, y }); else if (local) dispatch({ type: 'move', x, y }); else socket.emit('game:move', { x, y }) }} line={s.over?.line} last={last} disabled={!playing} />
 
           {/* ===== đối thủ bên phải ===== */}
           <section className="gm-card opp">
@@ -531,7 +581,7 @@ transform: `translate(-50%, -50%) scale(${scale})` }}>
           {/* ===== nút hành động ===== */}
           <button type="button" className="gm-act" style={{ top: 362 }} disabled={!!s.over}
             onClick={() => {
-              if (ai) return window.confirm('Đầu hàng và nhận thua?') && dispatch({ type: 'resign', side: 'X' })
+              if (ai) return window.confirm('Đầu hàng và nhận thua?') && aiAction('resign')
               if (local) return window.confirm(`${s.turn === 'X' ? user.name : opp.name} đầu hàng và nhận thua?`) && dispatch({ type: 'resign' })
               return window.confirm('Đầu hàng và nhận thua?') && socket.emit('game:resign')
             }}><Flag /><b>Đầu hàng</b></button>

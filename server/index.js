@@ -13,7 +13,7 @@ function validatePasswordComplexity(password, minLength = 8) {
 // Dùng lại đúng logic bàn cờ của client (client/src/lib/game.js).
 import { createServer } from 'node:http'
 import { Server } from 'socket.io'
-import { SIZE, TURN_TIME, checkWin, createBoard } from '../client/src/lib/game.js'
+import { SIZE, TURN_TIME, checkWin, createBoard, aiMove } from '../client/src/lib/game.js'
 import fs from 'node:fs'
 import { persistGameData } from './supabase-store.js'
 import { randomUUID, randomBytes, createHash } from 'node:crypto'
@@ -330,9 +330,115 @@ const authUser = (req) => {
   } catch { return null }
 }
 
+// XO_AI_SERVER_V1: Server-authoritative AI matches; no client-submitted results or balances.
+const aiSessions = new Map()
+const aiOwner = (req) => {
+  const key = mainKey(req)
+  if (key && mainData[key]?.user) return { id: 'main:' + key, key, user: mainData[key].user }
+  const user = authUser(req)
+  return user ? { id: 'user:' + user.id, key: null, user } : null
+}
+const aiSnapshot = (s) => ({
+  id: s.id, board: s.board, moves: s.moves, turn: s.over ? s.turn : 'X',
+  time: s.over ? 0 : Math.max(0, Math.ceil((s.deadline - Date.now()) / 1000)),
+  turnTime: TURN_TIME, mode: 'Chơi với máy', over: s.over
+})
+function aiFinish(s, reason, winner, line = null) {
+  if (s.match) return s.match
+  const owner = s.owner
+  const result = winner === null ? 'draw' : winner === 'X' ? 'win' : 'lose'
+  // Do not grant rewards/EXP for immediate resignations before a real game.
+  const eligible = s.moves.filter(m => m.s === 'X').length >= 2 || reason === 'five' || reason === 'full'
+  const coins = eligible ? ({ win: 200, draw: 100, lose: -200 }[result]) : 0
+  const gems = eligible ? ({ win: 100, draw: 50, lose: -100 }[result]) : 0
+  const entry = owner.key ? mainData[owner.key] : null
+  const user = entry ? entry.user : users.find(u => u.id === owner.user.id && !u.locked)
+  if (!user) throw new Error('AI account is no longer valid')
+  const match = {
+    id: s.id, room: 'AI', opponent: { name: 'Máy (AI)', avatar: '🤖' },
+    result, score: result === 'win' ? '1 - 0' : result === 'lose' ? '0 - 1' : '0 - 0',
+    moves: s.moves.map(m => ({ ...m })), reason, at: new Date().toISOString(),
+    serverVerified: true, onlineVerified: false, reward: { coins, gems }
+  }
+  const previous = { ...user }
+  const oldMatches = entry ? entry.matches : user.matches
+  try {
+    user.coins = Math.max(0, (Number(user.coins) || 0) + coins)
+    user.gems = Math.max(0, (Number(user.gems) || 0) + gems)
+    if (eligible) xoXp(user, result)
+    user.updatedAt = Date.now()
+    user.rev = (Number(user.rev) || 0) + 1
+    if (entry) entry.matches = [match, ...(entry.matches || []).filter(m => m.id !== match.id)].slice(0, 500)
+    else user.matches = [match, ...(user.matches || []).filter(m => m.id !== match.id)].slice(0, 500)
+    if (entry) atomicSave(MAIN_FILE, mainData)
+    else saveUsers()
+  } catch (e) {
+    Object.assign(user, previous)
+    if (entry) entry.matches = oldMatches
+    else user.matches = oldMatches
+    throw e
+  }
+  s.over = { winner, reason, line }
+  s.match = { ...match, balance: {
+    coins: user.coins, gems: user.gems, level: user.level,
+    exp: user.exp, expMax: user.expMax, rev: user.rev, updatedAt: user.updatedAt
+  }}
+  return s.match
+}
+async function aiApi(req, res, url) {
+  if (req.method !== 'POST') return send(res, 405, { error: 'Phương thức không hỗ trợ.' })
+  const owner = aiOwner(req)
+  if (!owner) return send(res, 401, { error: 'Vui lòng đăng nhập lại.' })
+  const b = await readBody(req)
+  let s = aiSessions.get(owner.id)
+  if (url === '/api/ai/start') {
+    if (!s || s.over) {
+      s = { id: randomUUID(), owner, board: createBoard(), moves: [],
+        turn: 'X', deadline: Date.now() + TURN_TIME * 1000, over: null, match: null }
+      aiSessions.set(owner.id, s)
+    }
+    return send(res, 200, { ok: true, state: aiSnapshot(s) })
+  }
+  if (!s || s.id !== b.id) return send(res, 409, { error: 'Trận AI đã hết hiệu lực, hãy bắt đầu trận mới.' })
+  try {
+    if (!s.over && Date.now() >= s.deadline) aiFinish(s, 'timeout', 'O')
+    if (s.over) return send(res, 200, { ok: true, state: aiSnapshot(s), match: s.match })
+    if (url === '/api/ai/state') return send(res, 200, { ok: true, state: aiSnapshot(s) })
+    if (url === '/api/ai/resign') {
+      aiFinish(s, 'resign', 'O')
+      return send(res, 200, { ok: true, state: aiSnapshot(s), match: s.match })
+    }
+    if (url !== '/api/ai/move') return send(res, 404, { error: 'API không tồn tại.' })
+    const { x, y } = b
+    if (!Number.isInteger(x) || !Number.isInteger(y) || x < 0 || y < 0 || x >= SIZE || y >= SIZE || s.board[y][x]) {
+      return send(res, 400, { error: 'Nước đi không hợp lệ.' })
+    }
+    s.board[y][x] = 'X'
+    s.moves.push({ x, y, s: 'X' })
+    let line = checkWin(s.board, x, y, 'X')
+    if (line) aiFinish(s, 'five', 'X', line)
+    else if (s.moves.length === SIZE * SIZE) aiFinish(s, 'full', null)
+    else {
+      const move = aiMove(s.board)
+      if (!move || s.board[move.y]?.[move.x]) throw new Error('Invalid AI move')
+      s.board[move.y][move.x] = 'O'
+      s.moves.push({ x: move.x, y: move.y, s: 'O' })
+      line = checkWin(s.board, move.x, move.y, 'O')
+      if (line) aiFinish(s, 'five', 'O', line)
+      else if (s.moves.length === SIZE * SIZE) aiFinish(s, 'full', null)
+    }
+    if (!s.over) s.deadline = Date.now() + TURN_TIME * 1000
+    return send(res, 200, { ok: true, state: aiSnapshot(s), ...(s.match ? { match: s.match } : {}) })
+  } catch (e) {
+    console.error('[AI game]', e)
+    return send(res, 500, { error: 'Không thể lưu trận AI. Vui lòng kiểm tra Backend.' })
+  }
+}
+
 async function api(req, res) {
   const url = req.url.split('?')[0]
   if (req.method === 'OPTIONS') return send(res, 200, {})
+  if (url.startsWith('/api/ai/')) return aiApi(req, res, url)
   if (['/api/achievements', '/api/news', '/api/events', '/api/daily-tasks', '/api/messages', '/api/notifications', '/api/mailbox'].includes(url)) return featureApi(req, res, url)
 
   if (req.method === 'POST' && url === '/api/friends') {

@@ -293,7 +293,7 @@ export default function Result() {
   const { match } = state
   const r = THEME[match.result] ? match.result : 'draw'
   const t = THEME[r]
-  const points = REWARD[r]
+  const points = match.reward?.coins ?? REWARD[r]
   const w = matches.filter((m) => m.result === 'win').length
   const d = matches.filter((m) => m.result === 'draw').length
   const l = matches.filter((m) => m.result === 'lose').length
@@ -368,7 +368,7 @@ transform: `translate(-50%, -50%) scale(${scale})` }}>
           <div className="rs-reward">
             <div className="rs-reward-in">
               <span className="rs-rw gold"><b>{points > 0 ? '+' : ''}{points} vàng</b></span>
-              <span className="rs-rw"><b>{GEM_REWARD[r] > 0 ? '+' : ''}{GEM_REWARD[r]} kim cương</b></span>
+              <span className="rs-rw"><b>{(match.reward?.gems ?? GEM_REWARD[r]) > 0 ? '+' : ''}{match.reward?.gems ?? GEM_REWARD[r]} kim cương</b></span>
             </div>
           </div>
           <div className="rs-reward-tag"><Gift /><b>Thưởng/phạt trận đấu</b></div>

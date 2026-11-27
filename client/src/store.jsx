@@ -379,14 +379,14 @@ useEffect(() => {
 
   const addMatch = (m) => {
     const key = offlineKey(user)
-    if (key && (m.room === 'AI' || m.room === 'LOCAL')) {
+    if (key && (m.room === 'AI' || m.room === 'LOCAL') && !m.serverVerified) {
       save(key, mergeHistory([m], load(key, [])))
     }
     setMatches((list) => [m, ...list])
     // Chỉ khách và trận chơi ngoại tuyến tự cập nhật tại máy.
     // Tài khoản đăng nhập chơi online do server xác nhận kết quả và lưu vàng.
     setUser((u) => {
-      if (!u || (m.onlineVerified && !u.guest)) return u
+      if (!u || m.serverVerified || (m.onlineVerified && !u.guest)) return u
       if (u.main) return m.room === 'AI' ? giveExp(u,m.result) : u // XO_XP_AI_FIX
       const delta = m.result === 'win' ? 200 : m.result === 'lose' ? -200 : 100
       const gemDelta = m.result === 'win' ? 100 : m.result === 'lose' ? -100 : 50
